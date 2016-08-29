@@ -21,7 +21,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	config := aws.Config{Region: aws.String("eu-west-1")}
+	config := aws.Config{Region: aws.String(*region)}
 
 	svc := elb.New(session.New(&config))
 
