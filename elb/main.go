@@ -4,10 +4,12 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elb"
+	"github.com/aws/aws-sdk-go/service/route53"
 )
 
 func main() {
@@ -22,13 +24,13 @@ func main() {
 	}
 
 	config := aws.Config{Region: aws.String(*region)}
+	session := session.New(&config)
 
-	svc := elb.New(session.New(&config))
-
+	elb_svc := elb.New(session)
 	params := &elb.DescribeLoadBalancersInput{
 		LoadBalancerNames: []*string{aws.String(*loadBalancerName)},
 	}
-	resp, err := svc.DescribeLoadBalancers(params)
+	resp, err := elb_svc.DescribeLoadBalancers(params)
 
 	if err != nil {
 		fmt.Println(err.Error())
@@ -41,5 +43,46 @@ func main() {
 		os.Exit(2)
 	}
 
-	fmt.Println(*resp.LoadBalancerDescriptions[0].DNSName)
+	protocol := "HTTP"
+	var port int64 = 80
+
+	for _, listener := range resp.LoadBalancerDescriptions[0].ListenerDescriptions {
+		if *listener.Listener.InstanceProtocol == "HTTPS" {
+			protocol = *listener.Listener.InstanceProtocol
+			port = *listener.Listener.LoadBalancerPort
+			break
+		}
+		port = *listener.Listener.LoadBalancerPort
+	}
+
+	dnsName := *resp.LoadBalancerDescriptions[0].DNSName
+	dnsNameDot := fmt.Sprintf("%s.", dnsName)
+	route53_svc := route53.New(session)
+
+	zones, err := route53_svc.ListHostedZones(&route53.ListHostedZonesInput{})
+
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(3)
+	}
+	for _, hostedZone := range zones.HostedZones {
+		zoneId := hostedZone.Id
+
+		records, err := route53_svc.ListResourceRecordSets(&route53.ListResourceRecordSetsInput{HostedZoneId: zoneId})
+		if err != nil {
+			fmt.Println(err.Error())
+			break
+		}
+		for _, record := range records.ResourceRecordSets {
+			if record.AliasTarget == nil || record.AliasTarget.DNSName == nil {
+				continue
+			}
+			if *record.AliasTarget.DNSName == dnsNameDot {
+				dnsName = strings.TrimRight(*record.Name, ".")
+				break
+			}
+
+		}
+	}
+	fmt.Println(fmt.Sprintf("%s://%s:%d", strings.ToLower(protocol), dnsName, port))
 }
