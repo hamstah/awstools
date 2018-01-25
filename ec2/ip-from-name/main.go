@@ -14,8 +14,8 @@ import (
 func main() {
 
 	instanceName := flag.String("name", "", "Name of the EC2 instance")
-	maxResults := flag.Int("max-results", 1, "Number of results")
 
+	maxResults := flag.Int("max-results", 9, "Number of results")
 	region := flag.String("region", "eu-west-1", "AWS region")
 	flag.Parse()
 
@@ -44,10 +44,12 @@ func main() {
 		fmt.Println(err.Error())
 		os.Exit(3)
 	}
-	ips := make([]string, len(resp.Reservations))
-	for index, reservation := range resp.Reservations {
+	ips := []string{}
+	for _, reservation := range resp.Reservations {
 		instance := reservation.Instances[0]
-		ips[index] = *instance.PrivateIpAddress
+		if instance != nil {
+			ips = append(ips, *instance.PrivateIpAddress)
+		}
 	}
 
 	sort.Strings(ips)
