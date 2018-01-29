@@ -18,7 +18,7 @@ var (
 	taskName    = app.Flag("task-name", "ECS task name").Required().String()
 	clusterName = app.Flag("cluster", "ECS cluster").Required().String()
 	services    = app.Flag("service", "ECS services").Required().Strings()
-	images      = app.Flag("images", "Change the images to the new ones. Container name=image").StringMap()
+	images      = app.Flag("image", "Change the images to the new ones. Container name=image").StringMap()
 	timeout     = app.Flag("timeout", "Timeout when waiting for services to update").Default("300s").Duration()
 )
 
