@@ -4,6 +4,7 @@ Some specialised tools to avoid pulling boto3
 
 ## Overview
 
+* `iam-session`: Create new IAM session with role assumption and MFA support. See [aws-session README](iam/session/README.md)
 * `cloudwatch-put-metric-data`: Basic sending a metric value to cloudwatch
 * `ec2-ip-from-name`: Given an EC2 name, list up to `-max-results` IPs associated with instances with that name (default is 1).
 * `ecr-get-login`: Prints out the command to run to auth with docker ECR. Check output flag for other options
@@ -19,7 +20,7 @@ Download the signature from the release and use GPG to verify it
 
 ```
 #!/usr/bin/env bash
-version=3.2
+version=4.4
 
 wget https://github.com/hamstah/awstools/releases/download/v${version}/ec2-ip-from-name
 wget https://github.com/hamstah/awstools/releases/download/v${version}/ec2-ip-from-name.asc
