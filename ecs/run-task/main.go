@@ -1,47 +1,33 @@
 package main
 
 import (
-	"flag"
-	"fmt"
-	"os"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/hamstah/awstools/common"
+	kingpin "gopkg.in/alecthomas/kingpin.v2"
+)
+
+var (
+	flags          = common.KingpinSessionFlags()
+	taskDefinition = kingpin.Flag("task-definition", "ECS task definition").Required().String()
+	cluster        = kingpin.Flag("cluster", "ECS cluster").Required().String()
 )
 
 func main() {
+	kingpin.CommandLine.Name = "ecs-run-task"
+	kingpin.CommandLine.Help = "Run a task on ECS."
+	kingpin.Parse()
 
-	taskDefinitionName := flag.String("task-definition", "", "Task definition name")
-	clusterName := flag.String("cluster-name", "", "Cluster name")
-	region := flag.String("region", "eu-west-1", "AWS region")
-	flag.Parse()
+	session := session.Must(session.NewSession())
+	conf := common.AssumeRoleConfig(flags, session)
 
-	if len(*taskDefinitionName) < 1 {
-		fmt.Println("Missing task definition name")
-		os.Exit(1)
-	}
+	ecsClient := ecs.New(session, conf)
 
-	if len(*clusterName) < 1 {
-		fmt.Println("Missing cluster name")
-		os.Exit(1)
-	}
-
-
-	config := aws.Config{Region: aws.String(*region)}
-	session := session.New(&config)
-
-	svc := ecs.New(session)
-
-	params := &ecs.RunTaskInput{
-		TaskDefinition: aws.String(*taskDefinitionName),
-		Cluster:        aws.String(*clusterName),
+	_, err := ecsClient.RunTask(&ecs.RunTaskInput{
+		TaskDefinition: taskDefinition,
+		Cluster:        cluster,
 		Count:          aws.Int64(1),
-	}
-	_, err := svc.RunTask(params)
-
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(2)
-	}
+	})
+	common.FatalOnError(err)
 }

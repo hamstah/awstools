@@ -1,56 +1,45 @@
 package main
 
 import (
-	"flag"
-	"fmt"
 	"os"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/hamstah/awstools/common"
+	kingpin "gopkg.in/alecthomas/kingpin.v2"
+)
+
+var (
+	flags    = common.KingpinSessionFlags()
+	bucket   = kingpin.Flag("bucket", "Name of the bucket").Required().String()
+	key      = kingpin.Flag("key", "Key to download").Required().String()
+	filename = kingpin.Flag("filename", "Output filename").Required().String()
 )
 
 func main() {
+	kingpin.CommandLine.Name = "s3-download"
+	kingpin.CommandLine.Help = "Download a file from S3."
+	kingpin.Parse()
 
-	bucket := flag.String("bucket", "", "Bucket name")
-	key := flag.String("key", "", "Key to download")
-	filename := flag.String("filename", "", "Filename")
-	flag.Parse()
+	session := session.Must(session.NewSession())
+	conf := common.AssumeRoleConfig(flags, session)
 
-	if len(*bucket) < 1 {
-		fmt.Println("Missing bucket name")
-		os.Exit(1)
-	}
-
-	if len(*key) < 1 {
-		fmt.Println("Missing key")
-		os.Exit(1)
-	}
-
-	if len(*filename) < 1 {
-		fmt.Println("Missing filename")
-		os.Exit(1)
-	}
-
-	sess, err := session.NewSession()
-	s3Svc := s3.New(sess)
-	downloader := s3manager.NewDownloaderWithClient(s3Svc)
-
+	s3Client := s3.New(session, conf)
+	downloader := s3manager.NewDownloaderWithClient(s3Client)
 
 	f, err := os.Create(*filename)
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(2)
-	}
+	common.FatalOnError(err)
+	defer f.Close()
 
 	_, err = downloader.Download(f, &s3.GetObjectInput{
-		Bucket: aws.String(*bucket),
-		Key:    aws.String(*key),
+		Bucket: bucket,
+		Key:    key,
 	})
 
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(2)
+		f.Close()
+		os.Remove(*filename)
+		common.Fatalln(err.Error())
 	}
 }

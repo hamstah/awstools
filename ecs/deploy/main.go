@@ -8,64 +8,32 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/hamstah/awstools/common"
 
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
-	app         = kingpin.New("ecs-deploy", "Update a task definition on ECS")
-	region      = app.Flag("region", "AWS Region").Default("eu-west-1").String()
-	taskName    = app.Flag("task-name", "ECS task name").Required().String()
-	clusterName = app.Flag("cluster", "ECS cluster").Required().String()
-	services    = app.Flag("service", "ECS services").Required().Strings()
-	images      = app.Flag("image", "Change the images to the new ones. Container name=image").StringMap()
-	timeout     = app.Flag("timeout", "Timeout when waiting for services to update").Default("300s").Duration()
+	flags    = common.KingpinSessionFlags()
+	taskName = kingpin.Flag("task-name", "ECS task name").Required().String()
+	cluster  = kingpin.Flag("cluster", "ECS cluster").Required().String()
+	services = kingpin.Flag("service", "ECS services").Required().Strings()
+	images   = kingpin.Flag("image", "Change the images to the new ones. Container name=image").StringMap()
+	timeout  = kingpin.Flag("timeout", "Timeout when waiting for services to update").Default("300s").Duration()
 )
 
-
-func getTaskDefinition(svc *ecs.ECS, taskName string) (*ecs.TaskDefinition) {
-	input := &ecs.DescribeTaskDefinitionInput{
-		TaskDefinition: aws.String(taskName),
-	}
-
-	result, err := svc.DescribeTaskDefinition(input)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "Failed to fetch the task definition", err)
-		os.Exit(1)
-	}
-	return result.TaskDefinition
-}
-
-func updateTaskDefinition(svc *ecs.ECS, taskDefinition *ecs.TaskDefinition) (*ecs.TaskDefinition) {
-	updateInput := &ecs.RegisterTaskDefinitionInput{
-		ContainerDefinitions:    taskDefinition.ContainerDefinitions,
-		Cpu:                     taskDefinition.Cpu,
-		ExecutionRoleArn:        taskDefinition.ExecutionRoleArn,
-		Family:                  taskDefinition.Family,
-		Memory:                  taskDefinition.Memory,
-		NetworkMode:             taskDefinition.NetworkMode,
-		PlacementConstraints:    taskDefinition.PlacementConstraints,
-		RequiresCompatibilities: taskDefinition.RequiresCompatibilities,
-		TaskRoleArn:             taskDefinition.TaskRoleArn,
-		Volumes:                 taskDefinition.Volumes,
-	}
-
-	updateResult, err := svc.RegisterTaskDefinition(updateInput)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "Failed to update the task definition", err)
-		os.Exit(1)
-	}
-	return updateResult.TaskDefinition
-}
-
 func main() {
-	kingpin.MustParse(app.Parse(os.Args[1:]))
+	kingpin.CommandLine.Name = "ecs-deploy"
+	kingpin.CommandLine.Help = "Update a task definition on ECS."
+	kingpin.Parse()
 
-	config := aws.Config{Region: aws.String(*region)}
-	session := session.New(&config)
-	svc := ecs.New(session)
+	session := session.Must(session.NewSession())
+	conf := common.AssumeRoleConfig(flags, session)
 
-	taskDefinition := getTaskDefinition(svc, *taskName)
+	ecsClient := ecs.New(session, conf)
+
+	taskDefinition, err := getTaskDefinition(ecsClient, taskName)
+	common.FatalOnError(err)
 
 	if len(*images) != 0 {
 		for _, containerDefinition := range taskDefinition.ContainerDefinitions {
@@ -76,18 +44,18 @@ func main() {
 		}
 	}
 
-	newTaskDefinition := updateTaskDefinition(svc, taskDefinition)
+	newTaskDefinition, err := updateTaskDefinition(ecsClient, taskDefinition)
+	common.FatalOnError(err)
+
 	fmt.Println(*newTaskDefinition.TaskDefinitionArn)
 
 	pending := 0
 	for _, service := range *services {
-
-		updateServiceInput := &ecs.UpdateServiceInput{
-			Cluster:        aws.String(*clusterName),
+		_, err := ecsClient.UpdateService(&ecs.UpdateServiceInput{
+			Cluster:        cluster,
 			Service:        aws.String(service),
-			TaskDefinition: aws.String(*newTaskDefinition.TaskDefinitionArn),
-		}
-		_, err := svc.UpdateService(updateServiceInput)
+			TaskDefinition: newTaskDefinition.TaskDefinitionArn,
+		})
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "Failed to update service", service, err)
 		} else {
@@ -101,23 +69,19 @@ func main() {
 	}
 
 	servicesInput := &ecs.DescribeServicesInput{
-		Cluster:  aws.String(*clusterName),
+		Cluster:  cluster,
 		Services: serviceNamesInput,
 	}
 
 	start := time.Now()
 	previousPending := 0
 	for pending > 0 {
-		servicesResult, err := svc.DescribeServices(servicesInput)
-		if err != nil {
-			fmt.Fprintln(os.Stderr, "Failed to fetch services", err)
-			os.Exit(2)
-		}
+		servicesResult, err := ecsClient.DescribeServices(servicesInput)
+		common.FatalOnError(err)
 
 		previousPending = pending
 		pending = 0
 		for _, service := range servicesResult.Services {
-
 			if *service.Deployments[0].PendingCount != 0 {
 				pending += 1
 			}
@@ -125,8 +89,7 @@ func main() {
 
 		if pending != 0 {
 			if time.Since(start) >= *timeout {
-				fmt.Println(os.Stderr, fmt.Sprintf("%s still pending, giving up after %s", pending, *timeout))
-				os.Exit(3)
+				common.Fatalln(fmt.Sprintf("%d still pending, giving up after %s", pending, *timeout))
 			}
 			if previousPending != pending {
 				fmt.Println(fmt.Sprintf("Waiting for %d service(s) to become ready", pending))
@@ -134,4 +97,38 @@ func main() {
 			time.Sleep(1 * time.Second)
 		}
 	}
+}
+
+func getTaskDefinition(ecsClient *ecs.ECS, taskName *string) (*ecs.TaskDefinition, error) {
+	input := &ecs.DescribeTaskDefinitionInput{
+		TaskDefinition: taskName,
+	}
+
+	result, err := ecsClient.DescribeTaskDefinition(input)
+	if err != nil {
+		return nil, err
+	}
+	return result.TaskDefinition, nil
+}
+
+func updateTaskDefinition(ecsClient *ecs.ECS, taskDefinition *ecs.TaskDefinition) (*ecs.TaskDefinition, error) {
+	updateInput := &ecs.RegisterTaskDefinitionInput{
+		ContainerDefinitions:    taskDefinition.ContainerDefinitions,
+		Cpu:                     taskDefinition.Cpu,
+		ExecutionRoleArn:        taskDefinition.ExecutionRoleArn,
+		Family:                  taskDefinition.Family,
+		Memory:                  taskDefinition.Memory,
+		NetworkMode:             taskDefinition.NetworkMode,
+		PlacementConstraints:    taskDefinition.PlacementConstraints,
+		RequiresCompatibilities: taskDefinition.RequiresCompatibilities,
+		TaskRoleArn:             taskDefinition.TaskRoleArn,
+		Volumes:                 taskDefinition.Volumes,
+	}
+
+	updateResult, err := ecsClient.RegisterTaskDefinition(updateInput)
+	if err != nil {
+		return nil, err
+	}
+
+	return updateResult.TaskDefinition, nil
 }

@@ -1,66 +1,53 @@
 package main
 
 import (
-	"flag"
 	"fmt"
-	"os"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elbv2"
 	"github.com/aws/aws-sdk-go/service/route53"
+	"github.com/hamstah/awstools/common"
+	kingpin "gopkg.in/alecthomas/kingpin.v2"
+)
+
+var (
+	flags            = common.KingpinSessionFlags()
+	loadBalancerName = kingpin.Flag("name", "Name of the load balancer").Required().String()
 )
 
 func main() {
+	kingpin.CommandLine.Name = "elb-resolve-alb-external-url"
+	kingpin.CommandLine.Help = "Resolve the public URL of an ALB."
+	kingpin.Parse()
 
-	loadBalancerName := flag.String("name", "", "Name of the load balancer")
-	region := flag.String("region", "eu-west-1", "AWS region")
-	flag.Parse()
+	session := session.Must(session.NewSession())
+	conf := common.AssumeRoleConfig(flags, session)
 
-	if len(*loadBalancerName) < 1 {
-		fmt.Println("Missing load balancer name")
-		os.Exit(1)
-	}
-
-	config := aws.Config{Region: aws.String(*region)}
-	session := session.New(&config)
-
-	elb_svc := elbv2.New(session)
-	params := &elbv2.DescribeLoadBalancersInput{
-		Names: []*string{aws.String(*loadBalancerName)},
-	}
-	resp, err := elb_svc.DescribeLoadBalancers(params)
-
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(3)
-	}
+	elbClient := elbv2.New(session, conf)
+	resp, err := elbClient.DescribeLoadBalancers(&elbv2.DescribeLoadBalancersInput{
+		Names: []*string{loadBalancerName},
+	})
+	common.FatalOnError(err)
 
 	l := len(resp.LoadBalancers)
-	if l < 0 {
-		fmt.Println("No load balancer found")
-		os.Exit(2)
+	if l == 0 {
+		common.Fatalln("No load balancer found")
 	}
 
 	dnsName := *resp.LoadBalancers[0].DNSName
 	dnsNameDot := fmt.Sprintf("%s.", dnsName)
-	route53_svc := route53.New(session)
 
-	zones, err := route53_svc.ListHostedZones(&route53.ListHostedZonesInput{})
+	route53Client := route53.New(session, conf)
+	zones, err := route53Client.ListHostedZones(&route53.ListHostedZonesInput{})
+	common.FatalOnError(err)
 
-	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(3)
-	}
 	for _, hostedZone := range zones.HostedZones {
-		zoneId := hostedZone.Id
+		records, err := route53Client.ListResourceRecordSets(&route53.ListResourceRecordSetsInput{
+			HostedZoneId: hostedZone.Id,
+		})
+		common.FatalOnError(err)
 
-		records, err := route53_svc.ListResourceRecordSets(&route53.ListResourceRecordSetsInput{HostedZoneId: zoneId})
-		if err != nil {
-			fmt.Println(err.Error())
-			break
-		}
 		for _, record := range records.ResourceRecordSets {
 			if record.AliasTarget == nil || record.AliasTarget.DNSName == nil {
 				continue
@@ -69,7 +56,6 @@ func main() {
 				dnsName = strings.TrimRight(*record.Name, ".")
 				break
 			}
-
 		}
 	}
 	fmt.Println(dnsName)
