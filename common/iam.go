@@ -1,12 +1,14 @@
 package common
 
 import (
+	"errors"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sts"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -44,6 +46,51 @@ func NewSession(region string) *session.Session {
 	return session.New(awsConfig)
 }
 
+type SessionTokenProvider struct {
+	SessionFlags *SessionFlags
+	Session      *session.Session
+}
+
+func (p *SessionTokenProvider) Retrieve() (credentials.Value, error) {
+	result := credentials.Value{}
+
+	var tokenCode *string
+	if *p.SessionFlags.MFATokenCode == "" {
+		stdinCode, err := stscreds.StdinTokenProvider()
+		if err != nil {
+			return result, nil
+		}
+		tokenCode = aws.String(stdinCode)
+	} else {
+		tokenCode = p.SessionFlags.MFATokenCode
+	}
+
+	input := &sts.GetSessionTokenInput{
+		SerialNumber: p.SessionFlags.MFASerialNumber,
+		TokenCode:    tokenCode,
+	}
+	conf := NewConfig(*p.SessionFlags.Region)
+	stsClient := sts.New(p.Session, conf)
+	output, err := stsClient.GetSessionToken(input)
+	if err != nil {
+		return result, err
+	}
+
+	if output.Credentials == nil {
+		return result, errors.New("Could not get credentials")
+	}
+
+	return credentials.Value{
+		AccessKeyID:     *output.Credentials.AccessKeyId,
+		SecretAccessKey: *output.Credentials.SecretAccessKey,
+		SessionToken:    *output.Credentials.SessionToken,
+	}, nil
+}
+
+func (p *SessionTokenProvider) IsExpired() bool {
+	return false
+}
+
 func AssumeRoleConfig(sessionFlags *SessionFlags, sess *session.Session) *aws.Config {
 	conf := NewConfig(*sessionFlags.Region)
 	if *sessionFlags.RoleArn != "" {
@@ -63,6 +110,11 @@ func AssumeRoleConfig(sessionFlags *SessionFlags, sess *session.Session) *aws.Co
 			}
 		})
 		conf.Credentials = creds
+	} else if *sessionFlags.MFASerialNumber != "" {
+		conf.Credentials = credentials.NewCredentials(&SessionTokenProvider{
+			SessionFlags: sessionFlags,
+			Session:      sess,
+		})
 	}
 	return conf
 }
