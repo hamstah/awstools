@@ -4,7 +4,8 @@ Some specialised tools to avoid pulling boto3
 
 ## Overview
 
-* `iam-session`: Create new IAM session with role assumption and MFA support. See [aws-session README](iam/session/README.md)
+* `iam-session`: Create new IAM session with role assumption and MFA support. [details](iam/session/)
+* `iam-public-ssh-keys`: Return the public SSH keys of an IAM user. [details](iam/public-ssh-keys)
 * `cloudwatch-put-metric-data`: Basic sending a metric value to cloudwatch
 * `ec2-ip-from-name`: Given an EC2 name, list up to `-max-results` IPs associated with instances with that name (default is 1).
 * `ecr-get-login`: Prints out the command to run to auth with docker ECR. Check output flag for other options
