@@ -29,13 +29,11 @@ func main() {
 	kingpin.Parse()
 
 	if len(*flags.RoleArn) == 0 && len(*saveProfileName) != 0 {
-		fmt.Println("--save-profile can only be used with --assume-role-arn")
-		os.Exit(1)
+		common.Fatalln("--save-profile can only be used with --assume-role-arn")
 	}
 
 	if len(*command) == 0 && len(*saveProfileName) == 0 {
-		fmt.Println("Use at least one of command or --save-profile-name")
-		os.Exit(1)
+		common.Fatalln("Use at least one of command or --save-profile-name")
 	}
 
 	session := session.Must(session.NewSession())
@@ -43,7 +41,7 @@ func main() {
 
 	stsClient := sts.New(session, conf)
 	res, err := stsClient.GetCallerIdentity(&sts.GetCallerIdentityInput{})
-	checkNoError(err)
+	common.FatalOnError(err)
 
 	if !*quiet {
 		fmt.Println(res)
@@ -52,7 +50,7 @@ func main() {
 	var creds credentials.Value
 	if conf.Credentials != nil {
 		creds, err = conf.Credentials.Get()
-		checkNoError(err)
+		common.FatalOnError(err)
 	}
 
 	if len(*saveProfileName) != 0 {
@@ -68,7 +66,7 @@ func saveProfile(conf *aws.Config, creds *credentials.Value) {
 	// update the credentials file
 	credsFilename := os.ExpandEnv("$HOME/.aws/credentials")
 	credsCfg, err := ini.Load(credsFilename)
-	checkNoError(err)
+	common.FatalOnError(err)
 
 	_, err = credsCfg.GetSection(*saveProfileName)
 	if err == nil {
@@ -87,18 +85,18 @@ func saveProfile(conf *aws.Config, creds *credentials.Value) {
 	}
 
 	newCredsSection, err := credsCfg.NewSection(*saveProfileName)
-	checkNoError(err)
+	common.FatalOnError(err)
 	_, err = newCredsSection.NewKey("aws_access_key_id", creds.AccessKeyID)
-	checkNoError(err)
+	common.FatalOnError(err)
 	_, err = newCredsSection.NewKey("aws_secret_access_key", creds.SecretAccessKey)
-	checkNoError(err)
+	common.FatalOnError(err)
 	_, err = newCredsSection.NewKey("aws_session_token", creds.SessionToken)
-	checkNoError(err)
+	common.FatalOnError(err)
 
 	// update the config file
 	configFilename := os.ExpandEnv("$HOME/.aws/config")
 	configCfg, err := ini.Load(configFilename)
-	checkNoError(err)
+	common.FatalOnError(err)
 
 	configSectionName := fmt.Sprintf("profile %s", *saveProfileName)
 	_, err = configCfg.GetSection(configSectionName)
@@ -107,11 +105,11 @@ func saveProfile(conf *aws.Config, creds *credentials.Value) {
 	}
 
 	newConfigSection, err := configCfg.NewSection(configSectionName)
-	checkNoError(err)
+	common.FatalOnError(err)
 	_, err = newConfigSection.NewKey("region", *conf.Region)
-	checkNoError(err)
+	common.FatalOnError(err)
 	_, err = newConfigSection.NewKey("format", "json")
-	checkNoError(err)
+	common.FatalOnError(err)
 
 	credsCfg.SaveTo(credsFilename)
 	configCfg.SaveTo(configFilename)
@@ -121,7 +119,7 @@ func promptConfirm(text string) bool {
 	var response string
 	fmt.Print(text)
 	_, err := fmt.Scanln(&response)
-	checkNoError(err)
+	common.FatalOnError(err)
 	fmt.Println()
 	return response == "y"
 }
@@ -155,11 +153,4 @@ func executeCommand(command *[]string, conf *aws.Config, creds *credentials.Valu
 	p.Stderr = os.Stderr
 	p.Stdout = os.Stdout
 	p.Run()
-}
-
-func checkNoError(err error) {
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
 }
