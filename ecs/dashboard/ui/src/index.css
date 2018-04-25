@@ -1,0 +1,50 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+
+.green {
+  color: green;
+}
+
+.divider {
+  border: none;
+}
+
+.table .no-border {
+  border: none;
+}
+
+.table td.strong-left, .table th.strong-left {
+  border-left: 2px solid #ccc;
+}
+
+.table td.strong-right, .table th.strong-right {
+  border-right: 2px solid #ccc;
+}
+
+.table td.strong-top, .table th.strong-top {
+  border-top: 2px solid #ccc;
+}
+
+.table tr:last-child td.strong-bottom, .table tr:last-child th.strong-bottom{
+  border-bottom: 2px solid #ccc;
+}
+
+.table th.subhead {
+  font-weight: 400;
+}
+
+.divider td {
+  font-size: 18px;
+  font-weight: 800;
+  padding-top: 25px;
+  padding-bottom: 15px;
+  margin-bottom: 10px;
+  border: none;
+}
+
+.table th {
+  text-align: center;
+}

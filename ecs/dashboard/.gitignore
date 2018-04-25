@@ -1,0 +1,4 @@
+ui/node_modules/*
+ui/.cache
+ui/dist
+config.json
