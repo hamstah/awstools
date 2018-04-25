@@ -1,2 +1,4 @@
 ui/node_modules/*
-*.json
+ui/.cache
+ui/dist
+config.json

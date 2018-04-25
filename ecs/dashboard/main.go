@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"os/exec"
 	"sync"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/gobuffalo/packr"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -34,12 +36,13 @@ var (
 	configFilename  = kingpin.Flag("config-file", "Config filename").Short('c').Default("config.json").String()
 	port            = kingpin.Flag("port", "Server port").Short('p').Default("8000").Int32()
 	refreshInterval = kingpin.Flag("refresh-interval", "Refresh interval (seconds)").Short('r').Default("30").Int()
+	openBrowser     = kingpin.Flag("open", "Open browser").Bool()
 )
 
 func main() {
 	kingpin.Parse()
 
-	region := os.Getenv("AWS_REGION")
+	region = os.Getenv("AWS_REGION")
 	if region == "" {
 		region = "eu-west-1"
 	}
@@ -70,7 +73,16 @@ func main() {
 		})
 	})
 
+	r.PathPrefix("/").Handler(http.FileServer(packr.NewBox("./ui/dist")))
+
 	cors := handlers.AllowedOrigins([]string{"*"})
+
+	if *openBrowser {
+		go func() {
+			<-time.After(1000 * time.Millisecond)
+			exec.Command("xdg-open", fmt.Sprintf("http://localhost:%d", *port)).Run()
+		}()
+	}
 
 	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), handlers.CORS(cors)(r))
 	if err != nil {
