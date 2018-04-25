@@ -28,8 +28,8 @@ func main() {
 	kingpin.CommandLine.Help = "Start a new session under a different role."
 	kingpin.Parse()
 
-	if len(*flags.RoleArn) == 0 && len(*saveProfileName) != 0 {
-		common.Fatalln("--save-profile can only be used with --assume-role-arn")
+	if len(*flags.RoleArn) == 0 && len(*saveProfileName) != 0 && len(*flags.MFASerialNumber) == 0 {
+		common.Fatalln("--save-profile can only be used with --assume-role-arn or --mfa-serial-number")
 	}
 
 	if len(*command) == 0 && len(*saveProfileName) == 0 {

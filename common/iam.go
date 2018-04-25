@@ -15,6 +15,7 @@ import (
 type SessionFlags struct {
 	RoleArn         *string
 	RoleExternalID  *string
+	RoleSessionName *string
 	Region          *string
 	MFASerialNumber *string
 	MFATokenCode    *string
@@ -24,6 +25,7 @@ func KingpinSessionFlags() *SessionFlags {
 	return &SessionFlags{
 		RoleArn:         kingpin.Flag("assume-role-arn", "Role to assume").String(),
 		RoleExternalID:  kingpin.Flag("assume-role-external-id", "External ID of the role to assume").String(),
+		RoleSessionName: kingpin.Flag("assume-role-session-name", "Role session name").String(),
 		Region:          kingpin.Flag("region", "AWS Region").String(),
 		MFASerialNumber: kingpin.Flag("mfa-serial-number", "MFA Serial Number").String(),
 		MFATokenCode:    kingpin.Flag("mfa-token-code", "MFA Token Code").String(),
@@ -98,6 +100,10 @@ func AssumeRoleConfig(sessionFlags *SessionFlags, sess *session.Session) *aws.Co
 		creds = stscreds.NewCredentials(sess, *sessionFlags.RoleArn, func(p *stscreds.AssumeRoleProvider) {
 			if *sessionFlags.RoleExternalID != "" {
 				p.ExternalID = sessionFlags.RoleExternalID
+			}
+
+			if *sessionFlags.RoleSessionName != "" {
+				p.RoleSessionName = *sessionFlags.RoleSessionName
 			}
 
 			if *sessionFlags.MFASerialNumber != "" {
