@@ -2,7 +2,9 @@ package common
 
 import (
 	"errors"
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -38,6 +40,15 @@ func NewConfig(region string) *aws.Config {
 	}
 	if region == "" {
 		region = "eu-west-1"
+	}
+
+	for _, key := range []string{"AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY"} {
+		value := os.Getenv(key)
+		if value != "" {
+			if strings.TrimSpace(value) != value {
+				Fatalln(fmt.Sprintf("%s has trailing spaces, please check your config", key))
+			}
+		}
 	}
 
 	return &aws.Config{Region: aws.String(region)}
