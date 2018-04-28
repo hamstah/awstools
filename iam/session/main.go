@@ -144,10 +144,20 @@ func executeCommand(command *[]string, conf *aws.Config, creds *credentials.Valu
 	} else {
 		pEnv = env
 	}
+
+	cmd := *command
+
 	if !*quiet {
-		fmt.Println("running", *command)
+		fmt.Println("running", cmd)
 	}
-	p := exec.Command((*command)[0], (*command)[1:]...)
+
+	// probably not the best way to to this
+	if cmd[0] == "/bin/bash" && len(cmd) == 1 {
+		bash := "/bin/bash --init-file <(echo \". \"$HOME/.bashrc\"; export PS1=\"\\(iam-session@%s\\)\\$PS1\"\")"
+		cmd = append(cmd, "-c", fmt.Sprintf(bash, *conf.Region))
+	}
+
+	p := exec.Command(cmd[0], cmd[1:]...)
 	p.Env = pEnv
 	p.Stdin = os.Stdin
 	p.Stderr = os.Stderr
