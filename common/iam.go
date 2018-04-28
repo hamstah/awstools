@@ -93,6 +93,14 @@ func (p *SessionTokenProvider) IsExpired() bool {
 	return false
 }
 
+func OpenSession(sessionFlags *SessionFlags) (*session.Session, *aws.Config) {
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		AssumeRoleTokenProvider: stscreds.StdinTokenProvider,
+		SharedConfigState:       session.SharedConfigEnable,
+	}))
+	return sess, AssumeRoleConfig(sessionFlags, sess)
+}
+
 func AssumeRoleConfig(sessionFlags *SessionFlags, sess *session.Session) *aws.Config {
 	conf := NewConfig(*sessionFlags.Region)
 	if *sessionFlags.RoleArn != "" {

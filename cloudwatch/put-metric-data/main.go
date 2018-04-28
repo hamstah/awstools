@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/hamstah/awstools/common"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
@@ -19,8 +18,7 @@ func main() {
 	kingpin.CommandLine.Help = "Put a cloudwatch metric value."
 	kingpin.Parse()
 
-	session := session.Must(session.NewSession())
-	conf := common.AssumeRoleConfig(flags, session)
+	session, conf := common.OpenSession(flags)
 
 	cloudwatchClient := cloudwatch.New(session, conf)
 	_, err := cloudwatchClient.PutMetricData(&cloudwatch.PutMetricDataInput{

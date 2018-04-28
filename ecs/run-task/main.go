@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/hamstah/awstools/common"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
@@ -19,8 +18,7 @@ func main() {
 	kingpin.CommandLine.Help = "Run a task on ECS."
 	kingpin.Parse()
 
-	session := session.Must(session.NewSession())
-	conf := common.AssumeRoleConfig(flags, session)
+	session, conf := common.OpenSession(flags)
 
 	ecsClient := ecs.New(session, conf)
 

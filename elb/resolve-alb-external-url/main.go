@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/elbv2"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/hamstah/awstools/common"
@@ -21,8 +20,7 @@ func main() {
 	kingpin.CommandLine.Help = "Resolve the public URL of an ALB."
 	kingpin.Parse()
 
-	session := session.Must(session.NewSession())
-	conf := common.AssumeRoleConfig(flags, session)
+	session, conf := common.OpenSession(flags)
 
 	elbClient := elbv2.New(session, conf)
 	resp, err := elbClient.DescribeLoadBalancers(&elbv2.DescribeLoadBalancersInput{

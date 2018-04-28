@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/hamstah/awstools/common"
 
@@ -27,8 +26,7 @@ func main() {
 	kingpin.CommandLine.Help = "Update a task definition on ECS."
 	kingpin.Parse()
 
-	session := session.Must(session.NewSession())
-	conf := common.AssumeRoleConfig(flags, session)
+	session, conf := common.OpenSession(flags)
 
 	ecsClient := ecs.New(session, conf)
 

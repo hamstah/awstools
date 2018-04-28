@@ -5,7 +5,6 @@ import (
 	"sort"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hamstah/awstools/common"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
@@ -22,8 +21,7 @@ func main() {
 	kingpin.CommandLine.Help = "Returns a list of instances IP with a given name."
 	kingpin.Parse()
 
-	session := session.Must(session.NewSession())
-	conf := common.AssumeRoleConfig(flags, session)
+	session, conf := common.OpenSession(flags)
 
 	ec2Client := ec2.New(session, conf)
 	resp, err := ec2Client.DescribeInstances(&ec2.DescribeInstancesInput{

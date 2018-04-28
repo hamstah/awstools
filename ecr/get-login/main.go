@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ecr"
 	"github.com/hamstah/awstools/common"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
@@ -21,8 +20,7 @@ func main() {
 	kingpin.CommandLine.Help = "Returns an authorization token from ECR."
 	kingpin.Parse()
 
-	session := session.Must(session.NewSession())
-	conf := common.AssumeRoleConfig(flags, session)
+	session, conf := common.OpenSession(flags)
 
 	ecrClient := ecr.New(session, conf)
 	result, err := ecrClient.GetAuthorizationToken(&ecr.GetAuthorizationTokenInput{})

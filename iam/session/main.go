@@ -8,7 +8,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/hamstah/awstools/common"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
@@ -36,8 +35,7 @@ func main() {
 		common.Fatalln("Use at least one of command or --save-profile-name")
 	}
 
-	session := session.Must(session.NewSession())
-	conf := common.AssumeRoleConfig(flags, session)
+	session, conf := common.OpenSession(flags)
 
 	stsClient := sts.New(session, conf)
 	res, err := stsClient.GetCallerIdentity(&sts.GetCallerIdentityInput{})

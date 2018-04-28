@@ -3,7 +3,6 @@ package main
 import (
 	"os"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/hamstah/awstools/common"
@@ -22,8 +21,7 @@ func main() {
 	kingpin.CommandLine.Help = "Download a file from S3."
 	kingpin.Parse()
 
-	session := session.Must(session.NewSession())
-	conf := common.AssumeRoleConfig(flags, session)
+	session, conf := common.OpenSession(flags)
 
 	s3Client := s3.New(session, conf)
 	downloader := s3manager.NewDownloaderWithClient(s3Client)
