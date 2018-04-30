@@ -4,7 +4,7 @@ set -e
 base=$(dirname $0)/..
 
 mkdir -p ${base}/bin
-rm ${base}/bin/*.asc
+rm -f ${base}/bin/*.asc
 
 echo "Building"
 find ${base} -name "main.go" | while read src; do
