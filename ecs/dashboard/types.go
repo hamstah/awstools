@@ -11,6 +11,7 @@ type Account struct {
 	Role        string `json:"role"`
 	ExternalID  string `json:"external_id"`
 	Prefix      string `json:"prefix"`
+	Region      string `json:"region"`
 }
 
 type Config struct {

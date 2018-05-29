@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/hamstah/awstools/common"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -12,8 +14,17 @@ func fetchAccount(account Account) (*AccountState, error) {
 	logger := log.WithFields(log.Fields{
 		"account": account.AccountName,
 	})
-	conf := createAWSConfig(account.Role, account.ExternalID, region, awsSession)
-	svc := ecs.New(awsSession, &conf)
+
+	sess, conf := common.OpenSession(&common.SessionFlags{
+		RoleArn:        &account.Role,
+		RoleExternalID: &account.ExternalID,
+		Region:         &account.Region,
+
+		RoleSessionName: aws.String(""),
+		MFASerialNumber: aws.String(""),
+		MFATokenCode:    aws.String(""),
+	})
+	svc := ecs.New(sess, conf)
 	clusterArns, err := getClusters(svc)
 	services := []*ecs.Service{}
 	taskDefinitions := map[string]*ecs.TaskDefinition{}

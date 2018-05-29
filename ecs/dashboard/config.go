@@ -6,10 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/fsnotify/fsnotify"
 )
 
@@ -68,23 +64,4 @@ func watchConfig(filename string) {
 		log.Fatal(err)
 	}
 	<-done
-}
-
-func createAWSConfig(arn string, externalID string, region string, sess *session.Session) aws.Config {
-
-	conf := aws.Config{Region: aws.String(region)}
-	if arn != "" {
-		// if ARN flag is passed in, we need to be able ot assume role here
-		var creds *credentials.Credentials
-		if externalID != "" {
-			// If externalID flag is passed, we need to include it in credentials struct
-			creds = stscreds.NewCredentials(sess, arn, func(p *stscreds.AssumeRoleProvider) {
-				p.ExternalID = &externalID
-			})
-		} else {
-			creds = stscreds.NewCredentials(sess, arn, func(p *stscreds.AssumeRoleProvider) {})
-		}
-		conf.Credentials = creds
-	}
-	return conf
 }

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import _ from 'lodash'
 
-const API = 'http://127.0.0.1:8000/api/overview';
+const API = '/api/overview';
 
 const FontAwesome = ({color, icon, text}) => (
   <div style={{color: color}}>
@@ -54,7 +54,7 @@ class App extends Component {
         for( const service of accountState["services"]) {
         const name = service["service_name"]
         var clusterName = _.last(service["cluster_arn"].split("/"))
-        if (prefix && clusterName.startsWith(prefix)) {
+        if (prefix && clusterName.startsWith(prefix )) {
           clusterName = clusterName.slice(prefix.length)
         }
         if (! services[clusterName]) {
