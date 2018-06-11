@@ -40,7 +40,7 @@ func main() {
 	for _, reservation := range resp.Reservations {
 		if len(reservation.Instances) > 0 {
 			instance := reservation.Instances[0]
-			if instance != nil {
+			if instance != nil && instance.PrivateIpAddress != nil {
 				ips = append(ips, *instance.PrivateIpAddress)
 			}
 		}
