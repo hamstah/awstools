@@ -1,4 +1,4 @@
-# iam-publis-ssh-keys
+# iam-public-ssh-keys
 
 ```
 usage: iam-public-ssh-keys [<flags>]
