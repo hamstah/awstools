@@ -13,6 +13,7 @@ import (
 var (
 	flags            = common.KingpinSessionFlags()
 	loadBalancerName = kingpin.Flag("name", "Name of the load balancer").Required().String()
+	dnsPrefix        = kingpin.Flag("dns-prefix", "Prefix to match on the DNS").String()
 )
 
 func main() {
@@ -52,7 +53,9 @@ func main() {
 			}
 			if *record.AliasTarget.DNSName == dnsNameDot {
 				dnsName = strings.TrimRight(*record.Name, ".")
-				break
+				if *dnsPrefix != "" && strings.HasPrefix(dnsName, *dnsPrefix) {
+					break
+				}
 			}
 		}
 	}
