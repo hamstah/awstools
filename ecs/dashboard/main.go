@@ -10,9 +10,9 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/gobuffalo/packr"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/gobuffalo/packr"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 

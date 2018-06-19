@@ -12,6 +12,7 @@ import (
 
 var (
 	flags      = common.KingpinSessionFlags()
+	infoFlags  = common.KingpinInfoFlags()
 	name       = kingpin.Flag("name", "Name of the EC2 instance").Required().String()
 	maxResults = kingpin.Flag("max-results", "Max number of IPs to return").Default("9").Int()
 )
@@ -20,6 +21,7 @@ func main() {
 	kingpin.CommandLine.Name = "ec2-ip-from-name"
 	kingpin.CommandLine.Help = "Returns a list of instances IP with a given name."
 	kingpin.Parse()
+	common.HandleInfoFlags(infoFlags)
 
 	session, conf := common.OpenSession(flags)
 

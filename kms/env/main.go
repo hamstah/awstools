@@ -18,6 +18,7 @@ import (
 
 var (
 	flags     = common.KingpinSessionFlags()
+	infoFlags = common.KingpinInfoFlags()
 	command   = kingpin.Arg("command", "Command to run, prefix with -- to pass args").Required().Strings()
 	kmsPrefix = kingpin.Flag("kms-prefix", "Prefix for the KMS environment variables").Default("KMS_").String()
 	ssmPrefix = kingpin.Flag("ssm-prefix", "Prefix for the SSM environment variables").Default("SSM_").String()
@@ -27,6 +28,7 @@ func main() {
 	kingpin.CommandLine.Name = "kms_env"
 	kingpin.CommandLine.Help = "Decrypt environment variables encrypted with KMS or SSM."
 	kingpin.Parse()
+	common.HandleInfoFlags(infoFlags)
 
 	session, conf := common.OpenSession(flags)
 	kmsClient := kms.New(session, conf)

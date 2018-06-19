@@ -12,6 +12,7 @@ import (
 
 var (
 	flags            = common.KingpinSessionFlags()
+	infoFlags        = common.KingpinInfoFlags()
 	loadBalancerName = kingpin.Flag("name", "Name of the load balancer").Required().String()
 )
 
@@ -20,6 +21,7 @@ func main() {
 	kingpin.CommandLine.Name = "elb-resolve-elb-external-url"
 	kingpin.CommandLine.Help = "Resolve the public URL of an ELB."
 	kingpin.Parse()
+	common.HandleInfoFlags(infoFlags)
 
 	session, conf := common.OpenSession(flags)
 

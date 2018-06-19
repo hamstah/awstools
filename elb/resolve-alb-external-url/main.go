@@ -12,6 +12,7 @@ import (
 
 var (
 	flags            = common.KingpinSessionFlags()
+	infoFlags        = common.KingpinInfoFlags()
 	loadBalancerName = kingpin.Flag("name", "Name of the load balancer").Required().String()
 	dnsPrefix        = kingpin.Flag("dns-prefix", "Prefix to match on the DNS").String()
 )
@@ -20,6 +21,7 @@ func main() {
 	kingpin.CommandLine.Name = "elb-resolve-alb-external-url"
 	kingpin.CommandLine.Help = "Resolve the public URL of an ALB."
 	kingpin.Parse()
+	common.HandleInfoFlags(infoFlags)
 
 	session, conf := common.OpenSession(flags)
 
