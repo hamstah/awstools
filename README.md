@@ -16,7 +16,7 @@ Collection of tools to make working with AWS a bit easier without having to depe
 * `elb-resolve-alb-external-url`: Both ELB classic and ALB. Given a name, returns route53 record associated with the ELB. Does not include scheme or port as it doesn't check listeners.
 * `lambda-ping`: Ping a URL with lambda and publish a custom cloudwatch metric with the result.
 * `s3-download`: Download a single file from s3
-* `kms-env`: Decrypts environment variables from SSM or KMS and runs a command.
+* `kms-env`: Decrypts environment variables from SSM or KMS and runs a command. [details](kms/env/)
 
 ## Authentication
 

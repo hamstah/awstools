@@ -40,9 +40,11 @@ func main() {
 			continue
 		}
 
-		newKey, newValue, err := handleEnvVar(kmsClient, ssmClient, parts[0], parts[1])
+		result, err := handleEnvVar(kmsClient, ssmClient, parts[0], parts[1])
 		common.FatalOnError(err)
-		pEnv = append(pEnv, fmt.Sprintf("%s=%s", newKey, newValue))
+		for newKey, newValue := range result {
+			pEnv = append(pEnv, fmt.Sprintf("%s=%s", newKey, newValue))
+		}
 	}
 
 	p := exec.Command((*command)[0], (*command)[1:]...)
@@ -53,22 +55,54 @@ func main() {
 	p.Run()
 }
 
-func handleEnvVar(kmsClient *kms.KMS, ssmClient *ssm.SSM, key, value string) (string, string, error) {
+func handleEnvVar(kmsClient *kms.KMS, ssmClient *ssm.SSM, key, value string) (map[string]string, error) {
 	if strings.HasPrefix(key, *kmsPrefix) {
 		newValue, err := kmsDecrypt(kmsClient, value)
 		if err != nil {
-			return "", "", err
+			return nil, err
 		}
-		return key[len(*kmsPrefix):], newValue, nil
+		return map[string]string{key[len(*kmsPrefix):]: newValue}, nil
 	} else if strings.HasPrefix(key, *ssmPrefix) {
-		newValue, err := ssmFetch(ssmClient, value)
-		if err != nil {
-			return "", "", err
+		if strings.HasSuffix(value, "/*") {
+			prefix := key[len(*ssmPrefix):]
+			// remove prefix if starts with _
+			if strings.HasPrefix(prefix, "_") {
+				prefix = ""
+			}
+			return getParametersByPath(ssmClient, value[:len(value)-2], prefix)
+		} else {
+			newValue, err := ssmFetch(ssmClient, value)
+			if err != nil {
+				return nil, err
+			}
+			return map[string]string{key[len(*ssmPrefix):]: newValue}, nil
 		}
-		return key[len(*ssmPrefix):], newValue, nil
 	}
 
-	return key, value, nil
+	return map[string]string{key: value}, nil
+}
+
+func getParametersByPath(client *ssm.SSM, path string, prefix string) (map[string]string, error) {
+	res, err := client.GetParametersByPath(&ssm.GetParametersByPathInput{
+		Path:           aws.String(path),
+		WithDecryption: aws.Bool(true),
+	})
+	if err != nil {
+		return nil, err
+	}
+	result := map[string]string{}
+
+	for _, parameter := range res.Parameters {
+		parts := strings.Split(*parameter.Name, "/")
+		key := strings.Replace(parts[len(parts)-1], "-", "_", -1)
+		key = strings.ToUpper(key)
+		if prefix != "" {
+			key = fmt.Sprintf("%s_%s", prefix, key)
+		}
+		result[key] = *parameter.Value
+	}
+
+	return result, nil
 }
 
 const (
