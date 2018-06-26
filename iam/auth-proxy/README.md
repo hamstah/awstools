@@ -212,8 +212,8 @@ You can use a navigator to access it through the http proxy. Go to `http://serve
 ## Access a server inside a VPC
 
 ```
-ssh -D8080 user@bastion
-AWS_PROFILE=<profile> iam-auth-proxy --socks-proxy 127.0.0.1:8080
+ssh -D8081 user@bastion
+AWS_PROFILE=<profile> iam-auth-proxy --socks-proxy 127.0.0.1:8081
 ````
 
 # Known limitations
