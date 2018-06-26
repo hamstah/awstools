@@ -121,6 +121,7 @@ func main() {
 				encryptionContext := map[string]string{}
 				err = json.Unmarshal(jsonEncryptionContext, &encryptionContext)
 				if err != nil {
+					log.Println(err)
 					return forbidden(r.Request, "Invalid auth headers returned by the server: Can't decode KMS encryption context")
 				}
 
@@ -129,6 +130,7 @@ func main() {
 
 				identity, err := stsClient.GetCallerIdentity(&sts.GetCallerIdentityInput{})
 				if err != nil {
+					log.Println(err)
 					return forbidden(r.Request, "Could not fetch IAM identity to authenticate")
 				}
 
@@ -136,15 +138,23 @@ func main() {
 					return forbidden(r.Request, fmt.Sprintf("The IAM identity does not match the server realm (expected: %s)", realm[1]))
 				}
 
-				creds, err := stsClient.GetSessionToken(&sts.GetSessionTokenInput{
+				tokenStsClient := stsClient
+				if *flags.RoleArn != "" || *flags.MFASerialNumber != "" {
+					// get the session token without the session
+					tokenStsClient = sts.New(common.NewSession(*flags.Region))
+				}
+
+				creds, err := tokenStsClient.GetSessionToken(&sts.GetSessionTokenInput{
 					DurationSeconds: aws.Int64(900),
 				})
 				if err != nil {
+					log.Println(err)
 					return forbidden(r.Request, "Could not get a session token")
 				}
 
 				serialized, err := json.Marshal(creds.Credentials)
 				if err != nil {
+					log.Println(err)
 					return forbidden(r.Request, "Could not get a session token")
 				}
 
@@ -160,6 +170,7 @@ func main() {
 					EncryptionContext: awsEncryptionContext,
 				})
 				if err != nil {
+					log.Println(err)
 					return forbidden(r.Request, "Could not get encrypt token")
 				}
 				str := base64.StdEncoding.EncodeToString(kmsRes.CiphertextBlob)

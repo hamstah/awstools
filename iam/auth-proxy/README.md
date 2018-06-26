@@ -36,7 +36,7 @@ You want to use IAM as your identity provider for a service as you already use I
 
 # Authentication Flow
 
-The proxy runs on the local machine of the user and negociate an auth cookie with the remote server.
+The proxy runs on the local machine of the user and negotiate an auth cookie with the remote server.
 
 ```
    +-----------+                +---------+                +----------+                +-------+
