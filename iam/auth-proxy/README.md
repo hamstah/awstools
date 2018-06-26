@@ -198,7 +198,7 @@ You need to add a trust relationship between the KMS key in the central account 
 [example-server.py](./example-server.py) has an example basic implementation of a server using flask
 ```
 pip install boto3 flask
-AUTH_AWS_ACCOUNT_ID=<account id> AWS_DEFAULT_REGION=eu-west-1 SECRET_KEY=<long random string> KMS_KEY_ID=<kms key arn> KMS_SALT=<long random string> python example-server.py
+AWS_ACCOUNT_ID=<account id> AWS_DEFAULT_REGION=eu-west-1 SECRET_KEY=<long random string> KMS_KEY_ID=<kms key arn> KMS_SALT=<long random string> python example-server.py
 ```
 
 *DO not use for anything serious*
