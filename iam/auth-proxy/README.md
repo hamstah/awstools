@@ -31,7 +31,7 @@ You want to use IAM as your identity provider for a service as you already use I
 
 ## Comparison to other AWS Solutions
 
-* Cognito: Cognito let's you use give IAM access to Cognito users but uses its own pool of users
+* Cognito: Cognito lets you use give IAM access to Cognito users but uses its own pool of users, it's the opposite
 * AWS SSO: Is not globally available
 
 # Authentication Flow
@@ -176,16 +176,16 @@ You need to add a trust relationship between the KMS key in the central account 
    }
   ```
 * User policy
-```
-{
-   "Sid": "UserCanEncrypt",
-   "Effect": "Allow",
-   "Action": [
-     "kms:Encrypt"
-   ],
-   "Resource": "<key arn>"
- }
-```
+  ```
+  {
+     "Sid": "UserCanEncrypt",
+     "Effect": "Allow",
+     "Action": [
+       "kms:Encrypt"
+     ],
+     "Resource": "<key arn>"
+   }
+  ```
 
 ## STS
 
