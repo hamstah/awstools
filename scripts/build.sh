@@ -11,6 +11,12 @@ commit=$(git rev-parse --short HEAD)
 echo "Building ${version} (${commit})"
 find ${base} -name "main.go" | while read src; do
     src=$(realpath --relative-to=${base} ${src})
+    if [ "$1" != "" ]; then
+      if [ "$1" != "${src}" ]; then
+        continue
+      fi
+    fi
+
     name=bin/$(echo ${src} | awk -F/ '{print $1"-"$2}')
     echo "  ${name}"
     folder=`dirname ${src}`
