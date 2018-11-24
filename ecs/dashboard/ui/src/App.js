@@ -210,7 +210,7 @@ render = () => {
                             images.push([tag, container["image"], ok])
                           }
                           component["version"] = ( allOk ?
-                            <Check color="green" />
+                            <Check color="green" text={images.map(image => image[0]).join("\n")} />
                             :
                             <FontAwesome
                               color="orange"
