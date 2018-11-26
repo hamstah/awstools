@@ -124,4 +124,4 @@ kms-env program
 
 Will have
 * `FOO=123`
-* `BAR=test
+* `BAR=test`
