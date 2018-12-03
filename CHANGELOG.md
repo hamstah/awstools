@@ -1,5 +1,15 @@
 # Changelog
 
+## v5.11.0 (03/12/2018)
+
+**New**
+
+* Added `--task-json` to `ecs-deploy`
+
+**Fix**
+
+* `ecs-deploy` would return before the deployment was completed
+
 ## v5.10.0 (23/11/2018)
 
 **New**

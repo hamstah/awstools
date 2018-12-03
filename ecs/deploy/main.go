@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"time"
 
@@ -15,11 +17,12 @@ import (
 var (
 	flags     = common.KingpinSessionFlags()
 	infoFlags = common.KingpinInfoFlags()
-	taskName  = kingpin.Flag("task-name", "ECS task name").Required().String()
+	taskName  = kingpin.Flag("task-name", "ECS task name").String()
 	cluster   = kingpin.Flag("cluster", "ECS cluster").Required().String()
 	services  = kingpin.Flag("service", "ECS services").Required().Strings()
 	images    = kingpin.Flag("image", "Change the images to the new ones. Container name=image").StringMap()
 	timeout   = kingpin.Flag("timeout", "Timeout when waiting for services to update").Default("300s").Duration()
+	taskJSON  = kingpin.Flag("task-json", "Path to a JSON file with the task definition to use").String()
 )
 
 func main() {
@@ -32,8 +35,28 @@ func main() {
 
 	ecsClient := ecs.New(session, conf)
 
-	taskDefinition, err := getTaskDefinition(ecsClient, taskName)
-	common.FatalOnError(err)
+	if *taskJSON != "" && *taskName != "" {
+		common.Fatalln("Use only one of --task-json and --task-name")
+	}
+
+	var err error
+	var taskDefinition *ecs.TaskDefinition
+
+	if *taskJSON != "" {
+		b, err := ioutil.ReadFile(*taskJSON)
+		common.FatalOnError(err)
+
+		taskDefinition = &ecs.TaskDefinition{}
+		err = json.Unmarshal(b, taskDefinition)
+		common.FatalOnError(err)
+
+		taskName = taskDefinition.Family
+	} else if *taskName != "" {
+		taskDefinition, err = getTaskDefinition(ecsClient, taskName)
+		common.FatalOnError(err)
+	} else {
+		common.Fatalln("One of --task-json or --task-name is required")
+	}
 
 	if len(*images) != 0 {
 		for _, containerDefinition := range taskDefinition.ContainerDefinitions {
@@ -59,7 +82,7 @@ func main() {
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "Failed to update service", service, err)
 		} else {
-			pending += 1
+			pending++
 		}
 	}
 
@@ -74,16 +97,15 @@ func main() {
 	}
 
 	start := time.Now()
-	previousPending := 0
 	for pending > 0 {
 		servicesResult, err := ecsClient.DescribeServices(servicesInput)
 		common.FatalOnError(err)
 
-		previousPending = pending
+		previousPending := pending
 		pending = 0
 		for _, service := range servicesResult.Services {
-			if *service.Deployments[0].PendingCount != 0 {
-				pending += 1
+			if *service.Deployments[0].RunningCount != *service.Deployments[0].DesiredCount {
+				pending++
 			}
 		}
 
