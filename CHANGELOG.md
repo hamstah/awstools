@@ -1,5 +1,12 @@
 # Changelog
 
+## v6.0.0 (17/12/2018)
+
+**Fix**
+
+* `iam-session` returns the command exit code
+* `kms-env` returns the command exit code
+
 ## v5.11.0 (03/12/2018)
 
 **New**

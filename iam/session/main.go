@@ -58,7 +58,7 @@ func main() {
 	}
 
 	if len(*command) > 0 {
-		executeCommand(command, conf, &creds)
+		os.Exit(executeCommand(command, conf, &creds))
 	}
 }
 
@@ -124,7 +124,7 @@ func promptConfirm(text string) bool {
 	return response == "y"
 }
 
-func executeCommand(command *[]string, conf *aws.Config, creds *credentials.Value) {
+func executeCommand(command *[]string, conf *aws.Config, creds *credentials.Value) int {
 	env := os.Environ()
 	var pEnv []string
 	if conf.Credentials != nil {
@@ -152,5 +152,9 @@ func executeCommand(command *[]string, conf *aws.Config, creds *credentials.Valu
 	p.Stdin = os.Stdin
 	p.Stderr = os.Stderr
 	p.Stdout = os.Stdout
-	p.Run()
+	err := p.Run()
+
+	// TODO: When https://github.com/golang/go/commit/be94dac4e945a2921b116761e41f1c22f0af2add is released, replace the below with
+	// os.Exit(p.ProcessState.ExitCode())
+	return common.GetExitCode(p, err)
 }

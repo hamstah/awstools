@@ -60,7 +60,11 @@ func main() {
 	p.Stdin = os.Stdin
 	p.Stderr = os.Stderr
 	p.Stdout = os.Stdout
-	p.Run()
+	err := p.Run()
+
+	// TODO: When https://github.com/golang/go/commit/be94dac4e945a2921b116761e41f1c22f0af2add is released, replace the below with
+	// os.Exit(p.ProcessState.ExitCode())
+	os.Exit(common.GetExitCode(p, err))
 }
 
 func handleEnvVar(kmsClient *kms.KMS, ssmClient *ssm.SSM, secretsManagerClient *secretsmanager.SecretsManager, key, value string) (map[string]string, error) {
