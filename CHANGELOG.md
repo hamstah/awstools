@@ -1,5 +1,11 @@
 # Changelog
 
+## v6.1.0 (21/12/2018)
+
+**New**
+
+* Added `iam-sync-users`
+
 ## v6.0.0 (17/12/2018)
 
 **Fix**
