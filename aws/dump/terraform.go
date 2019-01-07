@@ -167,8 +167,8 @@ func NewTerraformBackends(filename string) (*TerraformBackends, error) {
 	return result, nil
 }
 
-func LoadStateFromFile(filename string) ([]Resource, error) {
-	output := []Resource{}
+func LoadStateFromFile(filename string) ([]*Resource, error) {
+	output := []*Resource{}
 	reader, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -182,26 +182,37 @@ func LoadStateFromFile(filename string) ([]Resource, error) {
 	results, err := filter.Filter()
 	for _, result := range results {
 		switch result.Value.(type) {
-		case *states.ResourceInstance:
+		case *states.Resource:
 			// process
 		default:
 			continue
 		}
 
-		resourceInstance := result.Value.(*states.ResourceInstance)
-		if resourceInstance.Current == nil {
-			continue
-		}
+		resource := result.Value.(*states.Resource)
+		for _, resourceInstance := range resource.Instances {
 
-		attr := resourceInstance.Current.AttrsFlat
-		if attr["arn"] == "" {
-			continue
-		}
+			if resourceInstance.Current == nil {
+				continue
+			}
 
-		output = append(output, Resource{
-			ID:  attr["id"],
-			ARN: attr["arn"],
-		})
+			attr := resourceInstance.Current.AttrsFlat
+
+			additional := &Resource{
+				ID: attr["id"],
+			}
+
+			if attr["arn"] == "" {
+				switch resource.Addr.Type {
+				case "aws_iam_access_key":
+				default:
+					continue
+				}
+			} else {
+				additional.ARN = attr["arn"]
+			}
+
+			output = append(output, additional)
+		}
 
 	}
 
