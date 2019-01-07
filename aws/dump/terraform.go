@@ -204,6 +204,8 @@ func LoadStateFromFile(filename string) ([]*Resource, error) {
 			if attr["arn"] == "" {
 				switch resource.Addr.Type {
 				case "aws_iam_access_key":
+				case "aws_route53_record":
+				case "aws_route53_zone":
 				default:
 					continue
 				}

@@ -31,17 +31,17 @@ func main() {
 	common.FatalOnError(err)
 
 	fetchers := map[string]Fetcher{
-		"iam-list-groups":                IAMListGroups,
-		"iam-list-users-and-access-keys": IAMListUsersAndAccessKeys,
-		"iam-list-roles":                 IAMListRoles,
-		"iam-list-policies":              IAMListPolicies,
-		"s3-list-buckets":                S3ListBuckets,
-		"ec2-list-security-groups":       EC2ListSecurityGroups,
-		"ec2-list-vpcs":                  EC2ListVpcs,
-		"cloudwatch-list-alarms":         CloudwatchListAlarms,
-		"kms-list-aliases":               KMSListAliases,
-		"kms-list-keys":                  KMSListKeys,
-		"route53-list-hosted-zones":      Route53ListHostedZones,
+		"iam-list-groups":                           IAMListGroups,
+		"iam-list-users-and-access-keys":            IAMListUsersAndAccessKeys,
+		"iam-list-roles":                            IAMListRoles,
+		"iam-list-policies":                         IAMListPolicies,
+		"s3-list-buckets":                           S3ListBuckets,
+		"ec2-list-security-groups":                  EC2ListSecurityGroups,
+		"ec2-list-vpcs":                             EC2ListVpcs,
+		"cloudwatch-list-alarms":                    CloudwatchListAlarms,
+		"kms-list-aliases":                          KMSListAliases,
+		"kms-list-keys":                             KMSListKeys,
+		"route53-list-hosted-zones-and-record-sets": Route53ListHostedZonesAndRecordSets,
 	}
 
 	enabledFetchers := []Fetcher{}

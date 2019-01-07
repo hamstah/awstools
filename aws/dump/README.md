@@ -46,6 +46,7 @@ Flags:
   * Aliases (Ignores aliases for AWS managed keys)
 * Route53
   * HostedZones
+  * RecordSets
 * S3
   * Buckets
 
