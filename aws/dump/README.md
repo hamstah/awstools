@@ -98,3 +98,39 @@ Create a JSON file with the following structure
   ]
 }
 ```
+
+## Output
+
+The output file contains a JSON array of resources
+
+```
+[
+  ...
+  {
+    "id": "test-bucket",
+    "arn": "arn:aws:s3:::test-bucket",
+    "service": "s3",
+    "type": "bucket",
+    "account_id": "123456789012",
+    "region": "",
+    "metadata": null,
+    "managed_by": {
+      "state": "arn:aws:s3:::terraform-bucket/test.tfstate",
+      "type": "terraform"
+    }
+  },
+  {
+    "id": "prod-bucket",
+    "arn": "arn:aws:s3:::prod-bucket",
+    "service": "s3",
+    "type": "bucket",
+    "account_id": "123456789012",
+    "region": "",
+    "metadata": null,
+    "managed_by": null,
+  },
+  ...
+]
+```
+
+If `--only-unmanaged` is used only resources with `managed_by: null` will be returned.
