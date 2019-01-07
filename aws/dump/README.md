@@ -43,6 +43,7 @@ Flags:
   * Policies
 * KMS
   * Keys (Ignores deleted and AWS managed keys)
+  * Aliases (Ignores aliases for AWS managed keys)
 * S3
   * Buckets
 

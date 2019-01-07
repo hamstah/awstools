@@ -39,6 +39,7 @@ func main() {
 		"ec2-list-security-groups":       EC2ListSecurityGroups,
 		"ec2-list-vpcs":                  EC2ListVpcs,
 		"cloudwatch-list-alarms":         CloudwatchListAlarms,
+		"kms-list-aliases":               KMSListAliases,
 		"kms-list-keys":                  KMSListKeys,
 	}
 
