@@ -58,12 +58,12 @@ func (s3Backend *S3Backend) Download(destination string, options *Options) (map[
 
 		dir, _ := filepath.Split(transformed)
 
-		err := os.MkdirAll(filepath.Join(destination, dir), os.ModePerm)
+		err := os.MkdirAll(filepath.Join(destination, s3Backend.Bucket, dir), os.ModePerm)
 		if err != nil {
 			return nil, err
 		}
 
-		filename := filepath.Join(destination, transformed)
+		filename := filepath.Join(destination, s3Backend.Bucket, dir, transformed)
 		filenames[filename] = fmt.Sprintf("arn:aws:s3:::%s/%s", s3Backend.Bucket, key)
 
 		if _, err := os.Stat(filename); !os.IsNotExist(err) && !options.Overwrite {
