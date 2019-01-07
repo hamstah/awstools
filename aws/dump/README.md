@@ -31,6 +31,8 @@ Flags:
 
 ## Supported resources
 
+* CloudWatch
+  * Alarms
 * EC2
   * VPC
   * Security Groups
