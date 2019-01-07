@@ -44,6 +44,8 @@ Flags:
 * KMS
   * Keys (Ignores deleted and AWS managed keys)
   * Aliases (Ignores aliases for AWS managed keys)
+* Route53
+  * HostedZones
 * S3
   * Buckets
 

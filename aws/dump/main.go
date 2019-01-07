@@ -41,6 +41,7 @@ func main() {
 		"cloudwatch-list-alarms":         CloudwatchListAlarms,
 		"kms-list-aliases":               KMSListAliases,
 		"kms-list-keys":                  KMSListKeys,
+		"route53-list-hosted-zones":      Route53ListHostedZones,
 	}
 
 	enabledFetchers := []Fetcher{}
