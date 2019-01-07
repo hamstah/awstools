@@ -6,6 +6,7 @@ Collection of tools to make working with AWS a bit easier without having to depe
 
 | Tool                                                     | Overview                                                                                                        |
 |----------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| [aws-dump](aws/dump)                                     | Dumps (a subset of) AWS resources to JSON and optionally check if they are in terraform state.                  |
 | [iam-session](iam/session/)                              | Creates new IAM session with role assumption and MFA support.                                                   |
 | [iam-public-keys](iam/public-ssh-keys)                   | Returns the public SSH keys of an IAM user.                                                                     |
 | [iam-auth-proxy](iam/auth-proxy)                         | Use IAM as identity provider for services.                                                                      |
