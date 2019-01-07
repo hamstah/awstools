@@ -1,6 +1,6 @@
 # aws-dump
 
-Dumps AWS resources to JSON and optionally check if they are managed by Terraform
+Dumps AWS resources metadata to JSON and optionally check if they are managed by Terraform.
 
 ```
 usage: aws-dump --accounts-config=ACCOUNTS-CONFIG --output=OUTPUT [<flags>]
