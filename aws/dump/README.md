@@ -41,6 +41,8 @@ Flags:
   * Access keys
   * Roles
   * Policies
+* KMS
+  * Keys (Ignores deleted and AWS managed keys)
 * S3
   * Buckets
 
