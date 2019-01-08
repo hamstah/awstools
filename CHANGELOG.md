@@ -1,5 +1,12 @@
 # Changelog
 
+## v6.3.0 (08/01/2019)
+
+**New**
+
+* Added `ec2-describe-instances`
+* `aws-dump` added more resources
+
 ## v6.2.0 (07/01/2019)
 
 **New**

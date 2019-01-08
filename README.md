@@ -12,6 +12,7 @@ Collection of tools to make working with AWS a bit easier without having to depe
 | [iam-auth-proxy](iam/auth-proxy)                         | Use IAM as identity provider for services.                                                                      |
 | [iam-sync-users](iam/sync-users)                         | Create Linux users from IAM                                                                                     |
 | [cloudwatch-put-metric-data](cloudwatch/put-metric-data) | Basic sending a metric value to cloudwatch                                                                      |
+| [ec2-describe-instances](ec2/describe-instances)         | Describe EC2 instances by id or filter                                                                          |
 | [ec2-ip-from-name](ec2/ip-from-name)                     | Given an EC2 name, list up to `-max-results` IPs associated with instances with that name                       |
 | [ecr-get-login](ecr/get-login)                           | Prints out the command to run to auth with docker ECR. Check output flag for other options                      |
 | [ecs-dashboard](ecs/dashboard)                           | Shows ECS services and their version across multiple AWS accounts.                                              |
