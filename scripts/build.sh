@@ -21,8 +21,8 @@ find ${base} -name "main.go" | while read src; do
     echo "  ${name}"
     folder=`dirname ${src}`
     if [ ! -f ${folder}/Makefile ]; then
-	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -installsuffix cgo -o ${base}/${name} -ldflags="-s -w -X github.com/hamstah/awstools/common.Version=${version} -X github.com/hamstah/awstools/common.CommitHash=${commit}" ${folder}/*.go
-	gpg --armor --detach-sig ${base}/${name}
+	CGO_ENABLED=0 go build -installsuffix cgo -o ${base}/${name} -ldflags="-s -w -X github.com/hamstah/awstools/common.Version=${version} -X github.com/hamstah/awstools/common.CommitHash=${commit}" ${folder}/*.go
+	#gpg --armor --detach-sig ${base}/${name}
     else
 	cd ${folder}
 	make

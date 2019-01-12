@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/fatih/structs"
 )
 
 func EC2ListVpcs(session *Session) *FetchResult {
@@ -56,6 +58,7 @@ func EC2ListSecurityGroups(session *Session) *FetchResult {
 						"Description": *securityGroup.Description,
 					},
 				}
+				fmt.Println(resource.ARN)
 				if securityGroup.VpcId != nil {
 					resource.Metadata["VpcId"] = *securityGroup.VpcId
 				}
@@ -66,4 +69,57 @@ func EC2ListSecurityGroups(session *Session) *FetchResult {
 		})
 
 	return &FetchResult{securityGroups, err}
+}
+
+func EC2ListImages(session *Session) *FetchResult {
+	client := ec2.New(session.Session, session.Config)
+
+	images := []Resource{}
+
+	res, err := client.DescribeImages(&ec2.DescribeImagesInput{
+		Owners: []*string{aws.String("self")},
+	})
+	if err != nil {
+		return &FetchResult{nil, err}
+	}
+
+	for _, image := range res.Images {
+		images = append(images, Resource{
+			ID:        *image.ImageId,
+			Service:   "ec2",
+			Type:      "image",
+			AccountID: *image.OwnerId,
+			Region:    *session.Config.Region,
+			Metadata:  structs.Map(image),
+		})
+	}
+
+	return &FetchResult{images, err}
+}
+
+func EC2ListInstances(session *Session) *FetchResult {
+	client := ec2.New(session.Session, session.Config)
+
+	instances := []Resource{}
+	err := client.DescribeInstancesPages(&ec2.DescribeInstancesInput{},
+		func(page *ec2.DescribeInstancesOutput, lastPage bool) bool {
+			for _, reservation := range page.Reservations {
+				for _, instance := range reservation.Instances {
+					resource := Resource{
+						ID:        *instance.InstanceId,
+						ARN:       "",
+						AccountID: session.AccountID,
+						Service:   "ec2",
+						Type:      "instance",
+						Region:    *session.Config.Region,
+						Metadata:  structs.Map(instance),
+					}
+					instances = append(instances, resource)
+				}
+			}
+
+			return true
+		})
+
+	return &FetchResult{instances, err}
 }

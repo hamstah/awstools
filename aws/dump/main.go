@@ -38,6 +38,8 @@ func main() {
 		"s3-list-buckets":                           S3ListBuckets,
 		"ec2-list-security-groups":                  EC2ListSecurityGroups,
 		"ec2-list-vpcs":                             EC2ListVpcs,
+		"ec2-list-images":                           EC2ListImages,
+		"ec2-list-instances":                        EC2ListInstances,
 		"cloudwatch-list-alarms":                    CloudwatchListAlarms,
 		"kms-list-aliases":                          KMSListAliases,
 		"kms-list-keys":                             KMSListKeys,
