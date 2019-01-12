@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/fatih/structs"
 )
 
 func KMSListKeys(session *Session) *FetchResult {
@@ -38,11 +39,7 @@ func KMSListKeys(session *Session) *FetchResult {
 					continue
 				}
 
-				resource.Metadata = map[string]interface{}{
-					"Description": *metadata.Description,
-					"KeyState":    *metadata.KeyState,
-					"KeyUsage":    *metadata.KeyUsage,
-				}
+				resource.Metadata = structs.Map(metadata)
 				result.Resources = append(result.Resources, *resource)
 			}
 
@@ -69,7 +66,7 @@ func KMSListAliases(session *Session) *FetchResult {
 					result.Error = err
 					return false
 				}
-				resource.Metadata["AliasName"] = *alias.AliasName
+				resource.Metadata = structs.Map(alias)
 				result.Resources = append(result.Resources, *resource)
 			}
 

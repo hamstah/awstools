@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
+	"github.com/fatih/structs"
 )
 
 func IAMListUsersAndAccessKeys(session *Session) *FetchResult {
@@ -17,6 +18,7 @@ func IAMListUsersAndAccessKeys(session *Session) *FetchResult {
 					result.Error = err
 					return false
 				}
+				resource.Metadata = structs.Map(user)
 				result.Resources = append(result.Resources, *resource)
 
 				keysResult := IAMListAccessKeys(session, *user.UserName)
@@ -46,6 +48,7 @@ func IAMListGroups(session *Session) *FetchResult {
 					result.Error = err
 					return false
 				}
+				resource.Metadata = structs.Map(group)
 				result.Resources = append(result.Resources, *resource)
 			}
 
@@ -67,6 +70,7 @@ func IAMListRoles(session *Session) *FetchResult {
 					result.Error = err
 					return false
 				}
+				resource.Metadata = structs.Map(role)
 				result.Resources = append(result.Resources, *resource)
 			}
 
@@ -88,6 +92,7 @@ func IAMListPolicies(session *Session) *FetchResult {
 					result.Error = err
 					return false
 				}
+				resource.Metadata = structs.Map(policy)
 				result.Resources = append(result.Resources, *resource)
 			}
 
@@ -111,9 +116,7 @@ func IAMListAccessKeys(session *Session, username string) *FetchResult {
 					AccountID: session.AccountID,
 					Service:   "iam",
 					Type:      "access-key",
-					Metadata: map[string]interface{}{
-						"UserName": *accessKey.UserName,
-					},
+					Metadata:  structs.Map(accessKey),
 				})
 			}
 

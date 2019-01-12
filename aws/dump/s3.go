@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/fatih/structs"
 )
 
 func S3ListBuckets(session *Session) *FetchResult {
@@ -25,6 +26,7 @@ func S3ListBuckets(session *Session) *FetchResult {
 			Type:      "bucket",
 			// AccountID
 			// Region: Need to use GetBucketLocation
+			Metadata: structs.Map(bucket),
 		})
 	}
 

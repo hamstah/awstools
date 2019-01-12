@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/route53"
+	"github.com/fatih/structs"
 )
 
 func Route53ListHostedZonesAndRecordSets(session *Session) *FetchResult {
@@ -13,7 +14,6 @@ func Route53ListHostedZonesAndRecordSets(session *Session) *FetchResult {
 	result := &FetchResult{}
 	result.Error = client.ListHostedZonesPages(&route53.ListHostedZonesInput{},
 		func(page *route53.ListHostedZonesOutput, lastPage bool) bool {
-			fmt.Println(len(page.HostedZones))
 			for _, zone := range page.HostedZones {
 
 				parts := strings.Split(*zone.Id, "/")
@@ -24,9 +24,7 @@ func Route53ListHostedZonesAndRecordSets(session *Session) *FetchResult {
 					AccountID: session.AccountID,
 					Service:   "route53",
 					Type:      "zone",
-					Metadata: map[string]interface{}{
-						"Name": *zone.Name,
-					},
+					Metadata:  structs.Map(zone),
 				}
 				result.Resources = append(result.Resources, *resource)
 
@@ -68,12 +66,9 @@ func Route53ListResourceRecordSets(session *Session, hostedZoneID string) *Fetch
 					AccountID: session.AccountID,
 					Service:   "route53",
 					Type:      "record",
-					Metadata: map[string]interface{}{
-						"Name": *set.Name,
-						"Type": *set.Type,
-						"HostedZoneId": shortID,
-					},
+					Metadata:  structs.Map(set),
 				}
+				resource.Metadata["HostedZoneId"] = shortID
 
 				if len(records) > 0 {
 					resource.Metadata["ResourceRecords"] = records
@@ -91,7 +86,6 @@ func Route53ListResourceRecordSets(session *Session, hostedZoneID string) *Fetch
 
 			return true
 		})
-
 
 	return result
 }

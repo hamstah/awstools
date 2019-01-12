@@ -29,6 +29,7 @@ func EC2ListVpcs(session *Session) *FetchResult {
 			Type:      "vpc",
 			AccountID: *vpc.OwnerId,
 			Region:    *session.Config.Region,
+			Metadata:  structs.Map(vpc),
 		})
 	}
 
@@ -53,12 +54,8 @@ func EC2ListSecurityGroups(session *Session) *FetchResult {
 					Type:      "security-group",
 					AccountID: *securityGroup.OwnerId,
 					Region:    *session.Config.Region,
-					Metadata: map[string]interface{}{
-						"GroupName":   *securityGroup.GroupName,
-						"Description": *securityGroup.Description,
-					},
+					Metadata:  structs.Map(securityGroup),
 				}
-				fmt.Println(resource.ARN)
 				if securityGroup.VpcId != nil {
 					resource.Metadata["VpcId"] = *securityGroup.VpcId
 				}
