@@ -54,6 +54,14 @@ func Route53ListResourceRecordSets(session *Session, hostedZoneID string) *Fetch
 	result.Error = client.ListResourceRecordSetsPages(&route53.ListResourceRecordSetsInput{HostedZoneId: aws.String(hostedZoneID)},
 		func(page *route53.ListResourceRecordSetsOutput, lastPage bool) bool {
 			for _, set := range page.ResourceRecordSets {
+				if *set.Type == "NS" || *set.Type == "SOA" {
+					continue
+				}
+
+				records := []string{}
+				for _, record := range set.ResourceRecords {
+					records = append(records, *record.Value)
+				}
 
 				resource := &Resource{
 					ID:        fmt.Sprintf("%s_%s_%s", shortID, strings.TrimRight(*set.Name, "."), *set.Type),
@@ -63,8 +71,18 @@ func Route53ListResourceRecordSets(session *Session, hostedZoneID string) *Fetch
 					Metadata: map[string]interface{}{
 						"Name": *set.Name,
 						"Type": *set.Type,
+						"HostedZoneId": shortID,
 					},
 				}
+
+				if len(records) > 0 {
+					resource.Metadata["ResourceRecords"] = records
+				}
+
+				if set.AliasTarget != nil {
+					resource.Metadata["AliasTarget"] = *set.AliasTarget
+				}
+
 				if set.TTL != nil {
 					resource.Metadata["Ttl"] = fmt.Sprintf("%d", *set.TTL)
 				}
@@ -73,6 +91,7 @@ func Route53ListResourceRecordSets(session *Session, hostedZoneID string) *Fetch
 
 			return true
 		})
+
 
 	return result
 }
