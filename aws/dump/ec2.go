@@ -51,7 +51,7 @@ func EC2ListSecurityGroups(session *Session) *FetchResult {
 					Type:      "security-group",
 					AccountID: *securityGroup.OwnerId,
 					Region:    *session.Config.Region,
-					Metadata: map[string]string{
+					Metadata: map[string]interface{}{
 						"GroupName":   *securityGroup.GroupName,
 						"Description": *securityGroup.Description,
 					},

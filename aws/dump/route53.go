@@ -24,7 +24,7 @@ func Route53ListHostedZonesAndRecordSets(session *Session) *FetchResult {
 					AccountID: session.AccountID,
 					Service:   "route53",
 					Type:      "zone",
-					Metadata: map[string]string{
+					Metadata: map[string]interface{}{
 						"Name": *zone.Name,
 					},
 				}
@@ -60,7 +60,7 @@ func Route53ListResourceRecordSets(session *Session, hostedZoneID string) *Fetch
 					AccountID: session.AccountID,
 					Service:   "route53",
 					Type:      "record",
-					Metadata: map[string]string{
+					Metadata: map[string]interface{}{
 						"Name": *set.Name,
 						"Type": *set.Type,
 					},

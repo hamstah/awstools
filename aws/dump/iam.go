@@ -111,7 +111,7 @@ func IAMListAccessKeys(session *Session, username string) *FetchResult {
 					AccountID: session.AccountID,
 					Service:   "iam",
 					Type:      "access-key",
-					Metadata: map[string]string{
+					Metadata: map[string]interface{}{
 						"UserName": *accessKey.UserName,
 					},
 				})

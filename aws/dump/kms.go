@@ -38,7 +38,7 @@ func KMSListKeys(session *Session) *FetchResult {
 					continue
 				}
 
-				resource.Metadata = map[string]string{
+				resource.Metadata = map[string]interface{}{
 					"Description": *metadata.Description,
 					"KeyState":    *metadata.KeyState,
 					"KeyUsage":    *metadata.KeyUsage,

@@ -6,14 +6,14 @@ import (
 )
 
 type Resource struct {
-	ID        string            `json:"id"`
-	ARN       string            `json:"arn"`
-	Service   string            `json:"service"`
-	Type      string            `json:"type"`
-	AccountID string            `json:"account_id"`
-	Region    string            `json:"region"`
-	Metadata  map[string]string `json:"metadata"`
-	ManagedBy map[string]string `json:"managed_by"`
+	ID        string                 `json:"id"`
+	ARN       string                 `json:"arn"`
+	Service   string                 `json:"service"`
+	Type      string                 `json:"type"`
+	AccountID string                 `json:"account_id"`
+	Region    string                 `json:"region"`
+	Metadata  map[string]interface{} `json:"metadata"`
+	ManagedBy map[string]string      `json:"managed_by"`
 }
 
 func (r *Resource) UniqueID() string {
@@ -37,7 +37,7 @@ func NewResource(arn string) (*Resource, error) {
 		Type:      parsed.ResourceType,
 		AccountID: parsed.AccountID,
 		Region:    parsed.Region,
-		Metadata:  map[string]string{},
+		Metadata:  map[string]interface{}{},
 	}, nil
 }
 
