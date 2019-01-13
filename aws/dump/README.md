@@ -46,6 +46,7 @@ Flags:
   * Aliases (Ignores aliases for AWS managed keys)
 * Lambda
   * Functions
+  * Event Source Mappings
 * Route53
   * HostedZones
   * RecordSets
