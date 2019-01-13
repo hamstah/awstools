@@ -9,9 +9,18 @@ import (
 	"github.com/fatih/structs"
 )
 
-func Route53ListHostedZonesAndRecordSets(session *Session) *FetchResult {
+var (
+	Route53Service = Service{
+		Name: "route53",
+		Reports: map[string]Report{
+			"zones-and-records": Route53ListHostedZonesAndRecordSets,
+		},
+	}
+)
+
+func Route53ListHostedZonesAndRecordSets(session *Session) *ReportResult {
 	client := route53.New(session.Session, session.Config)
-	result := &FetchResult{}
+	result := &ReportResult{}
 	result.Error = client.ListHostedZonesPages(&route53.ListHostedZonesInput{},
 		func(page *route53.ListHostedZonesOutput, lastPage bool) bool {
 			for _, zone := range page.HostedZones {
@@ -42,13 +51,13 @@ func Route53ListHostedZonesAndRecordSets(session *Session) *FetchResult {
 	return result
 }
 
-func Route53ListResourceRecordSets(session *Session, hostedZoneID string) *FetchResult {
+func Route53ListResourceRecordSets(session *Session, hostedZoneID string) *ReportResult {
 	client := route53.New(session.Session, session.Config)
 
 	parts := strings.Split(hostedZoneID, "/")
 	shortID := parts[len(parts)-1]
 
-	result := &FetchResult{}
+	result := &ReportResult{}
 	result.Error = client.ListResourceRecordSetsPages(&route53.ListResourceRecordSetsInput{HostedZoneId: aws.String(hostedZoneID)},
 		func(page *route53.ListResourceRecordSetsOutput, lastPage bool) bool {
 			for _, set := range page.ResourceRecordSets {

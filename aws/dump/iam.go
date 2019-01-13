@@ -6,10 +6,23 @@ import (
 	"github.com/fatih/structs"
 )
 
-func IAMListUsersAndAccessKeys(session *Session) *FetchResult {
+var (
+	IAMService = Service{
+		Name:     "iam",
+		IsGlobal: true,
+		Reports: map[string]Report{
+			"users-and-access-keys": IAMListUsersAndAccessKeys,
+			"roles":                 IAMListRoles,
+			"policies":              IAMListPolicies,
+			"groups":                IAMListGroups,
+		},
+	}
+)
+
+func IAMListUsersAndAccessKeys(session *Session) *ReportResult {
 	client := iam.New(session.Session, session.Config)
 
-	result := &FetchResult{}
+	result := &ReportResult{}
 	result.Error = client.ListUsersPages(&iam.ListUsersInput{},
 		func(page *iam.ListUsersOutput, lastPage bool) bool {
 			for _, user := range page.Users {
@@ -35,10 +48,10 @@ func IAMListUsersAndAccessKeys(session *Session) *FetchResult {
 	return result
 }
 
-func IAMListGroups(session *Session) *FetchResult {
+func IAMListGroups(session *Session) *ReportResult {
 	client := iam.New(session.Session, session.Config)
 
-	result := &FetchResult{}
+	result := &ReportResult{}
 	result.Error = client.ListGroupsPages(&iam.ListGroupsInput{},
 		func(page *iam.ListGroupsOutput, lastPage bool) bool {
 			for _, group := range page.Groups {
@@ -58,10 +71,10 @@ func IAMListGroups(session *Session) *FetchResult {
 	return result
 }
 
-func IAMListRoles(session *Session) *FetchResult {
+func IAMListRoles(session *Session) *ReportResult {
 	client := iam.New(session.Session, session.Config)
 
-	result := &FetchResult{}
+	result := &ReportResult{}
 	result.Error = client.ListRolesPages(&iam.ListRolesInput{},
 		func(page *iam.ListRolesOutput, lastPage bool) bool {
 			for _, role := range page.Roles {
@@ -80,10 +93,10 @@ func IAMListRoles(session *Session) *FetchResult {
 	return result
 }
 
-func IAMListPolicies(session *Session) *FetchResult {
+func IAMListPolicies(session *Session) *ReportResult {
 	client := iam.New(session.Session, session.Config)
 
-	result := &FetchResult{}
+	result := &ReportResult{}
 	result.Error = client.ListPoliciesPages(&iam.ListPoliciesInput{Scope: aws.String("Local")},
 		func(page *iam.ListPoliciesOutput, lastPage bool) bool {
 			for _, policy := range page.Policies {
@@ -102,10 +115,10 @@ func IAMListPolicies(session *Session) *FetchResult {
 	return result
 }
 
-func IAMListAccessKeys(session *Session, username string) *FetchResult {
+func IAMListAccessKeys(session *Session, username string) *ReportResult {
 	client := iam.New(session.Session, session.Config)
 
-	result := &FetchResult{}
+	result := &ReportResult{}
 	result.Error = client.ListAccessKeysPages(&iam.ListAccessKeysInput{
 		UserName: aws.String(username),
 	},

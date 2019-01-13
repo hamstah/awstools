@@ -2,10 +2,19 @@ package main
 
 import "github.com/aws/aws-sdk-go/service/cloudwatch"
 
-func CloudwatchListAlarms(session *Session) *FetchResult {
+var (
+	CloudwatchService = Service{
+		Name: "cloudwatch",
+		Reports: map[string]Report{
+			"alarms": CloudwatchListAlarms,
+		},
+	}
+)
+
+func CloudwatchListAlarms(session *Session) *ReportResult {
 	client := cloudwatch.New(session.Session, session.Config)
 
-	result := &FetchResult{}
+	result := &ReportResult{}
 	result.Error = client.DescribeAlarmsPages(&cloudwatch.DescribeAlarmsInput{},
 		func(page *cloudwatch.DescribeAlarmsOutput, lastPage bool) bool {
 			for _, alarm := range page.MetricAlarms {

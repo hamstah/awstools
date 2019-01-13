@@ -8,14 +8,26 @@ import (
 	"github.com/fatih/structs"
 )
 
-func EC2ListVpcs(session *Session) *FetchResult {
+var (
+	EC2Service = Service{
+		Name: "ec2",
+		Reports: map[string]Report{
+			"vpcs":            EC2ListVpcs,
+			"security-groups": EC2ListSecurityGroups,
+			"images":          EC2ListImages,
+			"instances":       EC2ListInstances,
+		},
+	}
+)
+
+func EC2ListVpcs(session *Session) *ReportResult {
 	client := ec2.New(session.Session, session.Config)
 
 	vpcs := []Resource{}
 
 	res, err := client.DescribeVpcs(&ec2.DescribeVpcsInput{})
 	if err != nil {
-		return &FetchResult{nil, err}
+		return &ReportResult{nil, err}
 	}
 
 	for _, vpc := range res.Vpcs {
@@ -33,10 +45,10 @@ func EC2ListVpcs(session *Session) *FetchResult {
 		})
 	}
 
-	return &FetchResult{vpcs, err}
+	return &ReportResult{vpcs, err}
 }
 
-func EC2ListSecurityGroups(session *Session) *FetchResult {
+func EC2ListSecurityGroups(session *Session) *ReportResult {
 	client := ec2.New(session.Session, session.Config)
 
 	securityGroups := []Resource{}
@@ -65,10 +77,10 @@ func EC2ListSecurityGroups(session *Session) *FetchResult {
 			return true
 		})
 
-	return &FetchResult{securityGroups, err}
+	return &ReportResult{securityGroups, err}
 }
 
-func EC2ListImages(session *Session) *FetchResult {
+func EC2ListImages(session *Session) *ReportResult {
 	client := ec2.New(session.Session, session.Config)
 
 	images := []Resource{}
@@ -77,7 +89,7 @@ func EC2ListImages(session *Session) *FetchResult {
 		Owners: []*string{aws.String("self")},
 	})
 	if err != nil {
-		return &FetchResult{nil, err}
+		return &ReportResult{nil, err}
 	}
 
 	for _, image := range res.Images {
@@ -91,10 +103,10 @@ func EC2ListImages(session *Session) *FetchResult {
 		})
 	}
 
-	return &FetchResult{images, err}
+	return &ReportResult{images, err}
 }
 
-func EC2ListInstances(session *Session) *FetchResult {
+func EC2ListInstances(session *Session) *ReportResult {
 	client := ec2.New(session.Session, session.Config)
 
 	instances := []Resource{}
@@ -118,5 +130,5 @@ func EC2ListInstances(session *Session) *FetchResult {
 			return true
 		})
 
-	return &FetchResult{instances, err}
+	return &ReportResult{instances, err}
 }

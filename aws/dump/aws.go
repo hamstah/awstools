@@ -15,6 +15,7 @@ type Account struct {
 	RoleARN     string   `json:"role_arn"`
 	ExternalID  string   `json:"external_id"`
 	SessionName string   `json:"session_name"`
+	Sessions    []*Session
 }
 
 type Accounts struct {
@@ -41,6 +42,7 @@ func NewAccounts(filename string) (*Accounts, error) {
 	}
 
 	for _, account := range result.Accounts {
+		account.Sessions = []*Session{}
 		for _, region := range account.Regions {
 			sess, conf := common.OpenSession(&common.SessionFlags{
 				RoleArn:         &account.RoleARN,
@@ -57,12 +59,14 @@ func NewAccounts(filename string) (*Accounts, error) {
 			if err != nil {
 				return nil, err
 			}
-
-			result.Sessions = append(result.Sessions, &Session{
+			session := &Session{
 				Session:   sess,
 				Config:    conf,
 				AccountID: *identity.Account,
-			})
+			}
+			account.Sessions = append(account.Sessions, session)
+			result.Sessions = append(result.Sessions, session)
+
 		}
 	}
 

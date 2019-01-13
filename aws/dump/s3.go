@@ -7,14 +7,23 @@ import (
 	"github.com/fatih/structs"
 )
 
-func S3ListBuckets(session *Session) *FetchResult {
+var (
+	S3Service = Service{
+		Name: "s3",
+		Reports: map[string]Report{
+			"buckets": S3ListBuckets,
+		},
+	}
+)
+
+func S3ListBuckets(session *Session) *ReportResult {
 	client := s3.New(session.Session, session.Config)
 
 	buckets := []Resource{}
 
 	res, err := client.ListBuckets(&s3.ListBucketsInput{})
 	if err != nil {
-		return &FetchResult{nil, err}
+		return &ReportResult{nil, err}
 	}
 
 	for _, bucket := range res.Buckets {
@@ -30,5 +39,5 @@ func S3ListBuckets(session *Session) *FetchResult {
 		})
 	}
 
-	return &FetchResult{buckets, err}
+	return &ReportResult{buckets, err}
 }

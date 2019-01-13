@@ -7,10 +7,20 @@ import (
 	"github.com/fatih/structs"
 )
 
-func KMSListKeys(session *Session) *FetchResult {
+var (
+	KMSService = Service{
+		Name: "kms",
+		Reports: map[string]Report{
+			"keys":    KMSListKeys,
+			"aliases": KMSListAliases,
+		},
+	}
+)
+
+func KMSListKeys(session *Session) *ReportResult {
 	client := kms.New(session.Session, session.Config)
 
-	result := &FetchResult{}
+	result := &ReportResult{}
 	result.Error = client.ListKeysPages(&kms.ListKeysInput{},
 		func(page *kms.ListKeysOutput, lastPage bool) bool {
 			for _, key := range page.Keys {
@@ -49,10 +59,10 @@ func KMSListKeys(session *Session) *FetchResult {
 	return result
 }
 
-func KMSListAliases(session *Session) *FetchResult {
+func KMSListAliases(session *Session) *ReportResult {
 	client := kms.New(session.Session, session.Config)
 
-	result := &FetchResult{}
+	result := &ReportResult{}
 	result.Error = client.ListAliasesPages(&kms.ListAliasesInput{},
 		func(page *kms.ListAliasesOutput, lastPage bool) bool {
 			for _, alias := range page.Aliases {

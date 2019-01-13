@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/hamstah/awstools/common"
 
@@ -30,38 +31,47 @@ func main() {
 	accounts, err := NewAccounts(*accountsConfig)
 	common.FatalOnError(err)
 
-	fetchers := map[string]Fetcher{
-		"iam-list-groups":                           IAMListGroups,
-		"iam-list-users-and-access-keys":            IAMListUsersAndAccessKeys,
-		"iam-list-roles":                            IAMListRoles,
-		"iam-list-policies":                         IAMListPolicies,
-		"s3-list-buckets":                           S3ListBuckets,
-		"ec2-list-security-groups":                  EC2ListSecurityGroups,
-		"ec2-list-vpcs":                             EC2ListVpcs,
-		"ec2-list-images":                           EC2ListImages,
-		"ec2-list-instances":                        EC2ListInstances,
-		"cloudwatch-list-alarms":                    CloudwatchListAlarms,
-		"kms-list-aliases":                          KMSListAliases,
-		"kms-list-keys":                             KMSListKeys,
-		"route53-list-hosted-zones-and-record-sets": Route53ListHostedZonesAndRecordSets,
+	services := map[string]Service{
+		"cloudwatch": CloudwatchService,
+		"ec2":        EC2Service,
+		"iam":        IAMService,
+		"kms":        KMSService,
+		"route53":    Route53Service,
+		"s3":         S3Service,
 	}
 
-	enabledFetchers := []Fetcher{}
+	jobs := []Job{}
+
 	if len(*reports) == 0 {
-		for _, fetcher := range fetchers {
-			enabledFetchers = append(enabledFetchers, fetcher)
+		for _, service := range services {
+			for _, account := range accounts.Accounts {
+				newJobs, err := service.GenerateAllJobs(account)
+				common.FatalOnError(err)
+				jobs = append(jobs, newJobs...)
+			}
 		}
 	} else {
 		for _, name := range *reports {
-			if fetcher, ok := fetchers[name]; ok {
-				enabledFetchers = append(enabledFetchers, fetcher)
-			} else {
-				common.Fatalln(fmt.Sprintf("Invalid report %s", name))
+
+			parts := strings.Split(name, ":")
+			if len(parts) != 2 {
+				common.Fatalln(fmt.Sprintf("Invalid report format %s, should be service:resource", name))
+			}
+
+			service, ok := services[parts[0]]
+			if !ok {
+				common.Fatalln(fmt.Sprintf("Invalid service %s", parts[0]))
+			}
+
+			for _, account := range accounts.Accounts {
+				newJobs, err := service.GenerateJobs(account, parts[1])
+				common.FatalOnError(err)
+				jobs = append(jobs, newJobs...)
 			}
 		}
 	}
 
-	resources := Run(accounts.Sessions, enabledFetchers)
+	resources := Run(jobs)
 
 	report := []Resource{}
 	if *terraformBackendConfig != "" {
