@@ -26,12 +26,11 @@ func IAMListUsersAndAccessKeys(session *Session) *ReportResult {
 	result.Error = client.ListUsersPages(&iam.ListUsersInput{},
 		func(page *iam.ListUsersOutput, lastPage bool) bool {
 			for _, user := range page.Users {
-				resource, err := NewResource(*user.Arn)
+				resource, err := NewResource(*user.Arn, user)
 				if err != nil {
 					result.Error = err
 					return false
 				}
-				resource.Metadata = structs.Map(user)
 				result.Resources = append(result.Resources, *resource)
 
 				keysResult := IAMListAccessKeys(session, *user.UserName)
@@ -56,12 +55,11 @@ func IAMListGroups(session *Session) *ReportResult {
 		func(page *iam.ListGroupsOutput, lastPage bool) bool {
 			for _, group := range page.Groups {
 
-				resource, err := NewResource(*group.Arn)
+				resource, err := NewResource(*group.Arn, group)
 				if err != nil {
 					result.Error = err
 					return false
 				}
-				resource.Metadata = structs.Map(group)
 				result.Resources = append(result.Resources, *resource)
 			}
 
@@ -78,12 +76,11 @@ func IAMListRoles(session *Session) *ReportResult {
 	result.Error = client.ListRolesPages(&iam.ListRolesInput{},
 		func(page *iam.ListRolesOutput, lastPage bool) bool {
 			for _, role := range page.Roles {
-				resource, err := NewResource(*role.Arn)
+				resource, err := NewResource(*role.Arn, role)
 				if err != nil {
 					result.Error = err
 					return false
 				}
-				resource.Metadata = structs.Map(role)
 				result.Resources = append(result.Resources, *resource)
 			}
 
@@ -100,12 +97,11 @@ func IAMListPolicies(session *Session) *ReportResult {
 	result.Error = client.ListPoliciesPages(&iam.ListPoliciesInput{Scope: aws.String("Local")},
 		func(page *iam.ListPoliciesOutput, lastPage bool) bool {
 			for _, policy := range page.Policies {
-				resource, err := NewResource(*policy.Arn)
+				resource, err := NewResource(*policy.Arn, policy)
 				if err != nil {
 					result.Error = err
 					return false
 				}
-				resource.Metadata = structs.Map(policy)
 				result.Resources = append(result.Resources, *resource)
 			}
 

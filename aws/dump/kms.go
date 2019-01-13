@@ -25,7 +25,7 @@ func KMSListKeys(session *Session) *ReportResult {
 		func(page *kms.ListKeysOutput, lastPage bool) bool {
 			for _, key := range page.Keys {
 
-				resource, err := NewResource(*key.KeyArn)
+				resource, err := NewResource(*key.KeyArn, key)
 				if err != nil {
 					result.Error = err
 					return false
@@ -71,12 +71,11 @@ func KMSListAliases(session *Session) *ReportResult {
 					continue
 				}
 
-				resource, err := NewResource(*alias.AliasArn)
+				resource, err := NewResource(*alias.AliasArn, alias)
 				if err != nil {
 					result.Error = err
 					return false
 				}
-				resource.Metadata = structs.Map(alias)
 				result.Resources = append(result.Resources, *resource)
 			}
 

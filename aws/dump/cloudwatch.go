@@ -19,7 +19,7 @@ func CloudwatchListAlarms(session *Session) *ReportResult {
 		func(page *cloudwatch.DescribeAlarmsOutput, lastPage bool) bool {
 			for _, alarm := range page.MetricAlarms {
 
-				resource, err := NewResource(*alarm.AlarmArn)
+				resource, err := NewResource(*alarm.AlarmArn, alarm)
 				if err != nil {
 					result.Error = err
 					return false

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/fatih/structs"
 )
 
 type Resource struct {
@@ -25,7 +27,7 @@ func (r *Resource) UniqueID() string {
 	return r.ARN
 }
 
-func NewResource(arn string) (*Resource, error) {
+func NewResource(arn string, metadata interface{}) (*Resource, error) {
 	parsed, err := ParseARN(arn)
 	if err != nil {
 		return nil, err
@@ -38,7 +40,7 @@ func NewResource(arn string) (*Resource, error) {
 		Type:      parsed.ResourceType,
 		AccountID: parsed.AccountID,
 		Region:    parsed.Region,
-		Metadata:  map[string]interface{}{},
+		Metadata:  structs.Map(metadata),
 	}, nil
 }
 
