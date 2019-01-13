@@ -36,6 +36,7 @@ func main() {
 		"ec2":        EC2Service,
 		"iam":        IAMService,
 		"kms":        KMSService,
+		"lambda":     LambdaService,
 		"route53":    Route53Service,
 		"s3":         S3Service,
 	}

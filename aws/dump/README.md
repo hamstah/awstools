@@ -44,6 +44,8 @@ Flags:
 * KMS
   * Keys (Ignores deleted and AWS managed keys)
   * Aliases (Ignores aliases for AWS managed keys)
+* Lambda
+  * Functions
 * Route53
   * HostedZones
   * RecordSets
