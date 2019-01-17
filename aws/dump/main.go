@@ -32,6 +32,7 @@ func main() {
 	common.FatalOnError(err)
 
 	services := map[string]Service{
+		"acm":        ACMService,
 		"cloudwatch": CloudwatchService,
 		"ec2":        EC2Service,
 		"iam":        IAMService,

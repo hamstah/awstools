@@ -1,5 +1,18 @@
 # Changelog
 
+
+## v7.0.0 (17/01/2019)
+
+**Breaking changes**
+
+* `aws-dump` changed the report argument format
+
+**New**
+
+* `aws-dump` added more resources
+
+
+
 ## v6.3.0 (08/01/2019)
 
 **New**
