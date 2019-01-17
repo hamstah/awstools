@@ -56,3 +56,19 @@ The signing key is
 ```
 Primary key fingerprint: 5FC5 40A9 A2F2 B87B 9C49  3D9E 7D40 F516 7D5C 7058
 ```
+
+### Checking the sha256 of binaries
+
+* Get the `SHA256SUMS` files
+  ```
+  #!/usr/bin/env bash
+  version=5.0
+
+  wget https://github.com/hamstah/awstools/releases/download/v${version}/SHA256SUMS
+  wget https://github.com/hamstah/awstools/releases/download/v${version}/SHA256SUMS.asc
+  gpg --verify SHA256SUMS.asc SHA256SUMS
+  ```
+* Check the sha256 of downloaded binaries
+  ```
+  find . -type f ! -name "*.asc" ! -name SHA256SUMS | xargs -Ifile grep file SHA256SUMS | sha256sum --check
+  ```
