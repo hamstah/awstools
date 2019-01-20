@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hamstah/awstools/common"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,7 +20,7 @@ func TestParseArn(t *testing.T) {
 		[]string{"arn:partition:service:region:account-id:resourcetype:resource:qualifier", "{partition service region account-id resourcetype resource qualifier}"},
 	}
 	for _, testCase := range testCases {
-		parsed, err := ParseARN(testCase[0])
+		parsed, err := common.ParseARN(testCase[0])
 		require.NoError(t, err)
 		require.NotNil(t, parsed)
 		require.Equal(t, testCase[1], fmt.Sprintf("%s", *parsed))
