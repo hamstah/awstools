@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -50,8 +51,8 @@ func EC2ListVpcs(session *Session) *ReportResult {
 
 func EC2ListSecurityGroups(session *Session) *ReportResult {
 	client := ec2.New(session.Session, session.Config)
-
-	securityGroups := []Resource{}
+	result := &ReportResult{}
+	groupIds := []*string{}
 	err := client.DescribeSecurityGroupsPages(&ec2.DescribeSecurityGroupsInput{},
 		func(page *ec2.DescribeSecurityGroupsOutput, lastPage bool) bool {
 			for _, securityGroup := range page.SecurityGroups {
@@ -71,13 +72,61 @@ func EC2ListSecurityGroups(session *Session) *ReportResult {
 				if securityGroup.VpcId != nil {
 					resource.Metadata["VpcId"] = *securityGroup.VpcId
 				}
-				securityGroups = append(securityGroups, resource)
+				groupIds = append(groupIds, securityGroup.GroupId)
+				result.Resources = append(result.Resources, resource)
 			}
 
 			return true
 		})
 
-	return &ReportResult{securityGroups, err}
+	if err != nil {
+		result.Error = err
+		return result
+	}
+
+	// Max filter size is 200 values
+	batchSize := 200
+	var batches [][]*string
+
+	for batchSize < len(groupIds) {
+		groupIds, batches = groupIds[batchSize:], append(batches, groupIds[0:batchSize:batchSize])
+	}
+	batches = append(batches, groupIds)
+
+	used := map[string]interface{}{}
+	for _, batch := range batches {
+		err := client.DescribeNetworkInterfacesPages(&ec2.DescribeNetworkInterfacesInput{
+			Filters: []*ec2.Filter{
+				&ec2.Filter{
+					Name:   aws.String("group-id"),
+					Values: batch,
+				},
+			},
+		},
+			func(page *ec2.DescribeNetworkInterfacesOutput, lastPage bool) bool {
+				for _, networkInterface := range page.NetworkInterfaces {
+					for _, group := range networkInterface.Groups {
+						used[*group.GroupId] = 1
+					}
+				}
+				return true
+			})
+		if err != nil {
+			result.Error = err
+			return result
+		}
+	}
+
+	now := time.Now().UTC()
+	for _, resource := range result.Resources {
+		var lastUsed *time.Time
+		if _, ok := used[resource.ID]; ok {
+			lastUsed = &now
+		}
+		resource.Metadata["LastUsed"] = lastUsed
+	}
+
+	return result
 }
 
 func EC2ListImages(session *Session) *ReportResult {
