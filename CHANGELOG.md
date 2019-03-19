@@ -1,5 +1,14 @@
 # Changelog
 
+## v7.1.0 (19/03/2018)
+
+**New**
+
+* `aws-dump`: Added LastUsed to metadata
+
+**Fix**
+
+* `elb-resolve-alb-external-url`: Fix incorrect resolution
 
 ## v7.0.0 (17/01/2019)
 
