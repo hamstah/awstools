@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/service/elbv2"
@@ -42,7 +43,7 @@ func main() {
 	route53Client := route53.New(session, conf)
 	zones, err := route53Client.ListHostedZones(&route53.ListHostedZonesInput{})
 	common.FatalOnError(err)
-
+	found := false
 	for _, hostedZone := range zones.HostedZones {
 		records, err := route53Client.ListResourceRecordSets(&route53.ListResourceRecordSetsInput{
 			HostedZoneId: hostedZone.Id,
@@ -54,12 +55,21 @@ func main() {
 				continue
 			}
 			if *record.AliasTarget.DNSName == dnsNameDot {
-				dnsName = strings.TrimRight(*record.Name, ".")
-				if *dnsPrefix != "" && strings.HasPrefix(dnsName, *dnsPrefix) {
+				trimmedDNSName := strings.TrimRight(*record.Name, ".")
+				if *dnsPrefix != "" && strings.HasPrefix(trimmedDNSName, *dnsPrefix) {
+					dnsName = trimmedDNSName
+					found = true
 					break
 				}
 			}
 		}
+		if found {
+			break
+		}
 	}
+	if !found {
+		os.Exit(1)
+	}
+
 	fmt.Println(dnsName)
 }
