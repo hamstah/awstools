@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -21,6 +22,7 @@ type SessionFlags struct {
 	Region          *string
 	MFASerialNumber *string
 	MFATokenCode    *string
+	Duration        *time.Duration
 }
 
 func KingpinSessionFlags() *SessionFlags {
@@ -31,6 +33,7 @@ func KingpinSessionFlags() *SessionFlags {
 		Region:          kingpin.Flag("region", "AWS Region").String(),
 		MFASerialNumber: kingpin.Flag("mfa-serial-number", "MFA Serial Number").String(),
 		MFATokenCode:    kingpin.Flag("mfa-token-code", "MFA Token Code").String(),
+		Duration:        kingpin.Flag("session-duration", "Session Duration").Default("1h").Duration(),
 	}
 }
 
@@ -123,6 +126,10 @@ func AssumeRoleConfig(sessionFlags *SessionFlags, sess *session.Session) *aws.Co
 
 			if *sessionFlags.RoleSessionName != "" {
 				p.RoleSessionName = *sessionFlags.RoleSessionName
+			}
+
+			if sessionFlags.Duration != nil {
+				p.Duration = *sessionFlags.Duration
 			}
 
 			if *sessionFlags.MFASerialNumber != "" {
