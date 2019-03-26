@@ -1,5 +1,14 @@
 # Changelog
 
+## v7.2.0 (26/03/2018)
+
+**New**
+
+* `iam-sync-users`
+  * Added locking users not in IAM with `--lock-missing` and `--lock-ignore-user`
+  * Added setting groups from IAM tags with `--iam-tags-prefix`
+  * Made sudo optional with `--sudo`/`--no-sudo`
+
 ## v7.1.0 (19/03/2018)
 
 **New**

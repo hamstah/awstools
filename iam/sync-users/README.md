@@ -7,23 +7,30 @@ Note: Only works on Linux with sudo
 ```
 usage: iam-sync-users [<flags>]
 
-Create users from IAM
+Sync local users with IAM
 
 Flags:
-      --help             Show context-sensitive help (also try --help-long and --help-man).
+      --help                 Show context-sensitive help (also try --help-long and --help-man).
       --assume-role-arn=ASSUME-ROLE-ARN
-                         Role to assume
+                             Role to assume
       --assume-role-external-id=ASSUME-ROLE-EXTERNAL-ID
-                         External ID of the role to assume
+                             External ID of the role to assume
       --assume-role-session-name=ASSUME-ROLE-SESSION-NAME
-                         Role session name
-      --region=REGION    AWS Region
+                             Role session name
+      --region=REGION        AWS Region
       --mfa-serial-number=MFA-SERIAL-NUMBER
-                         MFA Serial Number
+                             MFA Serial Number
       --mfa-token-code=MFA-TOKEN-CODE
-                         MFA Token Code
-  -v, --version          Display the version
-      --group=GROUP ...  Add users from this group. You can use --group multiple times.
+                             MFA Token Code
+      --session-duration=1h  Session Duration
+  -v, --version              Display the version
+      --group=GROUP ...      Add users from this IAM group. You can use --group multiple times.
+      --iam-tags-prefix=IAM-TAGS-PREFIX
+                             Prefix for tags in IAM
+      --lock-missing         Lock local users not in IAM.
+      --lock-ignore-user=LOCK-IGNORE-USER ...
+                             Ignore local user when locking.
+      --sudo                 Add users to sudoers file.
 ```
 
 ## IAM policy
