@@ -23,6 +23,7 @@ import (
 type IAMUser struct {
 	Username string
 	Groups   []string
+	Sudo     bool
 }
 
 var (
@@ -60,7 +61,7 @@ func main() {
 		_, err := user.Lookup(u.Username)
 		if err != nil {
 			// user doesn't exists
-			common.FatalOnError(createUser(u, *sudo))
+			common.FatalOnError(createUser(u))
 
 			_, err = user.Lookup(u.Username)
 			common.FatalOnError(err)
@@ -69,7 +70,7 @@ func main() {
 			err := UnlockLocalUser(u.Username)
 			common.FatalOnError(err)
 		}
-
+		common.FatalOnError(syncUserSudo(u, *sudo))
 		common.FatalOnError(syncUserGroups(u))
 		iamUsers[u.Username] = 1
 	}
@@ -198,20 +199,35 @@ func syncUserGroups(iamUser *IAMUser) error {
 	return nil
 }
 
-func createUser(iamUser *IAMUser, withSudo bool) error {
+func syncUserSudo(iamUser *IAMUser, defaultSudo bool) error {
+	sudoFilename := fmt.Sprintf("/etc/sudoers.d/%s", strings.Replace(iamUser.Username, ".", "", -1))
+	withSudo := iamUser.Sudo || defaultSudo
+
+	_, err := os.Stat(sudoFilename)
+	hasSudo := (err == nil)
+
+	if withSudo {
+		// nothing to do
+		if hasSudo {
+			return nil
+		}
+
+		return ioutil.WriteFile(sudoFilename, []byte(fmt.Sprintf("%s ALL=(ALL) NOPASSWD:ALL\n", iamUser.Username)), 0644)
+	} else {
+		// nothing to do
+		if !hasSudo {
+			return nil
+		}
+
+		return os.Remove(sudoFilename)
+	}
+}
+
+func createUser(iamUser *IAMUser) error {
 	cmd := exec.Command("/usr/sbin/adduser", iamUser.Username)
 	err := cmd.Run()
 	if err != nil {
 		return err
-	}
-
-	if withSudo {
-		sudoFilename := fmt.Sprintf("/etc/sudoers.d/%s", strings.Replace(iamUser.Username, ".", "", -1))
-
-		err = ioutil.WriteFile(sudoFilename, []byte(fmt.Sprintf("%s ALL=(ALL) NOPASSWD:ALL\n", iamUser.Username)), 0644)
-		if err != nil {
-			return err
-		}
 	}
 
 	return nil
@@ -263,7 +279,8 @@ func getUsersForGroup(client *iam.IAM, groupName string, iamTagsPrefix string) (
 	usersChan := make(chan string, len(users))
 	results := make(chan *IAMUser, len(users))
 
-	tagName := fmt.Sprintf("%s:groups", iamTagsPrefix)
+	sudoTagName := fmt.Sprintf("%s:sudo", iamTagsPrefix)
+	groupsTagName := fmt.Sprintf("%s:groups", iamTagsPrefix)
 
 	for w := 0; w < 10; w++ {
 		go func(usernames chan string, results chan *IAMUser) {
@@ -280,22 +297,24 @@ func getUsersForGroup(client *iam.IAM, groupName string, iamTagsPrefix string) (
 				}
 
 				for _, tag := range res.Tags {
-					if *tag.Key != tagName {
-						continue
-					}
 
-					seen := map[string]interface{}{}
-					for _, groupName := range strings.Split(*tag.Value, " ") {
-						if groupName == "" {
-							continue
+					switch *tag.Key {
+					case groupsTagName:
+						seen := map[string]interface{}{}
+						for _, groupName := range strings.Split(*tag.Value, " ") {
+							if groupName == "" {
+								continue
+							}
+							if _, ok := seen[groupName]; ok {
+								continue
+							}
+							seen[groupName] = true
+							result.Groups = append(result.Groups, groupName)
 						}
-						if _, ok := seen[groupName]; ok {
-							continue
-						}
-						seen[groupName] = true
-						result.Groups = append(result.Groups, groupName)
+						sort.Strings(result.Groups)
+					case sudoTagName:
+						result.Sudo = *tag.Value == "true"
 					}
-					sort.Strings(result.Groups)
 				}
 
 				results <- result
