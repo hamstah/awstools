@@ -11,6 +11,7 @@ rm -f ${sums_file}*
 version=$(cat ${base}/VERSION)
 commit=$(git rev-parse --short HEAD)
 
+mac_supported="iam-session kms-env aws-dump ecr-get-login ec2-describe-instances ec2-ip-from-name"
 
 echo "Building ${version} (${commit})"
 find ${base} -name "main.go" | while read src; do
@@ -21,16 +22,23 @@ find ${base} -name "main.go" | while read src; do
       fi
     fi
 
-    name=bin/$(echo ${src} | awk -F/ '{print $1"-"$2}')
+    fname=$(echo ${src} | awk -F/ '{print $1"-"$2}')
+    name=bin/${fname}
     echo "  ${name}"
     folder=`dirname ${src}`
     if [ ! -f ${folder}/Makefile ]; then
-	CGO_ENABLED=0 go build -installsuffix cgo -o ${base}/${name} -ldflags="-s -w -X github.com/hamstah/awstools/common.Version=${version} -X github.com/hamstah/awstools/common.CommitHash=${commit}" ${folder}/*.go
-	gpg --armor --detach-sig ${base}/${name}
+        CGO_ENABLED=0 go build -installsuffix cgo -o ${base}/${name} -ldflags="-s -w -X github.com/hamstah/awstools/common.Version=${version} -X github.com/hamstah/awstools/common.CommitHash=${commit}" ${folder}/*.go
+        gpg --armor --detach-sig ${base}/${name}
+
+        if [[ ${mac_supported} =~ ${fname} ]]; then
+          GOOS=darwin CGO_ENABLED=0 go build -installsuffix cgo -o ${base}/${name}_darwin -ldflags="-s -w -X github.com/hamstah/awstools/common.Version=${version} -X github.com/hamstah/awstools/common.CommitHash=${commit}" ${folder}/*.go
+          gpg --armor --detach-sig ${base}/${name}_darwin
+        fi
+
     else
-	cd ${folder}
-	make
-	cd -
+        cd ${folder}
+        make
+        cd -
     fi
 done
 

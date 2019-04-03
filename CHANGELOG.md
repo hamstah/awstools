@@ -1,5 +1,11 @@
 # Changelog
 
+## v7.3.0 (27/03/2018)
+
+**New**
+
+* `iam-sync-users`: Manage sudo with IAM tags
+
 ## v7.2.0 (26/03/2018)
 
 **New**
