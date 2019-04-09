@@ -1,0 +1,224 @@
+before:
+  hooks:
+    - go mod download
+archive:
+  format: binary
+checksum:
+  name_template: 'SHA256SUMS'
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+sign:
+  signature: "${artifact}.asc"
+  artifacts: all
+nfpm:
+  vendor: hamstah
+  homepage: https://github.com/hamstah/awstools
+  maintainer: Nico Esteves <contact@hamstah.com>
+  license: MIT
+  formats:
+    - deb
+    - rpm
+builds:
+
+  - env:
+      - CGO_ENABLED=0
+    main: ./aws/dump/
+    binary: aws-dump
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./elb/resolve-alb-external-url/
+    binary: elb-resolve-alb-external-url
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./elb/resolve-elb-external-url/
+    binary: elb-resolve-elb-external-url
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./ec2/ip-from-name/
+    binary: ec2-ip-from-name
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./ec2/describe-instances/
+    binary: ec2-describe-instances
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./kms/env/
+    binary: kms-env
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./cloudwatch/put-metric-data/
+    binary: cloudwatch-put-metric-data
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./iam/sync-users/
+    binary: iam-sync-users
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./iam/auth-proxy/
+    binary: iam-auth-proxy
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./iam/session/
+    binary: iam-session
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./iam/public-ssh-keys/
+    binary: iam-public-ssh-keys
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./ecs/dashboard/
+    binary: ecs-dashboard
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./ecs/deploy/
+    binary: ecs-deploy
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./ecs/locate/
+    binary: ecs-locate
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./ecs/run-task/
+    binary: ecs-run-task
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./lambda/ping/
+    binary: lambda-ping
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./ecr/get-login/
+    binary: ecr-get-login
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./s3/download/
+    binary: s3-download
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"

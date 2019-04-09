@@ -1,0 +1,38 @@
+before:
+  hooks:
+    - go mod download
+archive:
+  format: binary
+checksum:
+  name_template: 'SHA256SUMS'
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+sign:
+  signature: "${artifact}.asc"
+  artifacts: all
+nfpm:
+  vendor: hamstah
+  homepage: https://github.com/hamstah/awstools
+  maintainer: Nico Esteves <contact@hamstah.com>
+  license: MIT
+  formats:
+    - deb
+    - rpm
+builds:
+{% for build in builds %}
+  - env:
+      - CGO_ENABLED=0
+    main: {{build.src}}
+    binary: {{build.name}}
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{ '{{' }}.Version{{ '}}' }} -X github.com/hamstah/awstools/common.CommitHash={{ '{{' }}.ShortCommit{{ '}}' }}"
+  {%- endfor %}
