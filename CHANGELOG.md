@@ -1,5 +1,14 @@
 # Changelog
 
+## v7.4.0 (09/04/2018)
+
+**New**
+
+* `iam-sync-users`:
+  - Added logging
+  - Added expiring accounts with `chage`
+  - Added setting an invalid password for new user to support Ubuntu account unlocking
+
 ## v7.3.0 (27/03/2018)
 
 **New**
