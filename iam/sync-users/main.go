@@ -27,8 +27,6 @@ type IAMUser struct {
 }
 
 var (
-	flags          = common.KingpinSessionFlags()
-	infoFlags      = common.KingpinInfoFlags()
 	groups         = kingpin.Flag("group", "Add users from this IAM group. You can use --group multiple times.").Strings()
 	iamTagsPrefix  = kingpin.Flag("iam-tags-prefix", "Prefix for tags in IAM").Default("iam-sync-users").String()
 	lockMissing    = kingpin.Flag("lock-missing", "Lock local users not in IAM.").Default("false").Bool()
@@ -39,8 +37,7 @@ var (
 func main() {
 	kingpin.CommandLine.Name = "iam-sync-users"
 	kingpin.CommandLine.Help = "Sync local users with IAM"
-	kingpin.Parse()
-	common.HandleInfoFlags(infoFlags)
+	flags := common.HandleFlags()
 	common.FatalOnError(ensureCanCreateUser())
 
 	session := session.Must(session.NewSession())
