@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/hamstah/awstools/common"
+	log "github.com/sirupsen/logrus"
 
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
@@ -135,7 +136,7 @@ func worker(iamClient *iam.IAM, encoding, username *string, sshKeysIDs <-chan *s
 			UserName:       username,
 		})
 		if err != nil {
-			common.ErrorLog.Println(err)
+			log.Error(err)
 			sshKeys <- nil
 		} else {
 			sshKeys <- result.SSHPublicKey.SSHPublicKeyBody

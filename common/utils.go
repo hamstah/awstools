@@ -1,24 +1,20 @@
 package common
 
 import (
-	"log"
-	"os"
 	"os/exec"
 	"syscall"
-)
 
-var (
-	ErrorLog = log.New(os.Stderr, "", log.LstdFlags)
+	log "github.com/sirupsen/logrus"
 )
 
 func FatalOnError(err error) {
 	if err != nil {
-		ErrorLog.Fatalln(err)
+		log.Fatalln(err)
 	}
 }
 
 func Fatalln(message string) {
-	ErrorLog.Fatalln(message)
+	log.Fatalln(message)
 }
 
 func GetExitCode(cmd *exec.Cmd, err error) int {
