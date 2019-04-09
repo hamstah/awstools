@@ -186,8 +186,7 @@ func LockLocalUser(username string) error {
 	if err != nil {
 		return err
 	}
-
-	return nil
+	return RunCommand("/usr/bin/chage", "-E", "-l", username)
 }
 
 func UnlockLocalUser(username string) error {
@@ -196,6 +195,8 @@ func UnlockLocalUser(username string) error {
 	if err != nil {
 		return err
 	}
+	return RunCommand("/usr/bin/chage", "-E", "-1", username)
+}
 
 func syncUserGroups(iamUser *IAMUser) error {
 	groupsStr := strings.Join(iamUser.Groups, ",")
@@ -238,7 +239,7 @@ func createUser(iamUser *IAMUser) error {
 		return err
 	}
 
-	return nil
+	return RunCommand("/usr/sbin/usermod", iamUser.Username, "-p", "'!'")
 }
 
 func ensureCanCreateUser() error {
