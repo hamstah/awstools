@@ -16,7 +16,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hamstah/awstools/common"
-
+	log "github.com/sirupsen/logrus"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -168,9 +168,21 @@ func LocalUsers() ([]*user.User, error) {
 	return users, err
 }
 
+func RunCommand(command string, args ...string) error {
+	cmd := exec.Command(command, args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"exit_code": cmd.ProcessState.ExitCode(),
+		}).Error(fmt.Sprintf("Failed to run command %s: %s", command, string(output)))
+		return err
+	}
+	return nil
+}
+
 func LockLocalUser(username string) error {
-	cmd := exec.Command("/usr/sbin/usermod", "-L", username)
-	err := cmd.Run()
+	log.WithField("username", username).Info("Locking user")
+	err := RunCommand("/usr/sbin/usermod", "-L", username)
 	if err != nil {
 		return err
 	}
@@ -179,24 +191,19 @@ func LockLocalUser(username string) error {
 }
 
 func UnlockLocalUser(username string) error {
-	cmd := exec.Command("/usr/sbin/usermod", "-U", username)
-	err := cmd.Run()
+	log.WithField("username", username).Info("Unlocking user")
+	err := RunCommand("/usr/sbin/usermod", "-U", username)
 	if err != nil {
 		return err
 	}
-
-	return nil
-}
 
 func syncUserGroups(iamUser *IAMUser) error {
-
-	cmd := exec.Command("/usr/sbin/usermod", "-G", strings.Join(iamUser.Groups, ","), iamUser.Username)
-	err := cmd.Run()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	groupsStr := strings.Join(iamUser.Groups, ",")
+	log.WithFields(log.Fields{
+		"username": iamUser.Username,
+		"groups": groupsStr,
+		}).Info("Setting user groups")
+	return RunCommand("/usr/sbin/usermod", "-G", groupsStr, iamUser.Username)
 }
 
 func syncUserSudo(iamUser *IAMUser, defaultSudo bool) error {
@@ -211,7 +218,7 @@ func syncUserSudo(iamUser *IAMUser, defaultSudo bool) error {
 		if hasSudo {
 			return nil
 		}
-
+		log.WithField("username", iamUser.Username).Info("Adding sudo to user")
 		return ioutil.WriteFile(sudoFilename, []byte(fmt.Sprintf("%s ALL=(ALL) NOPASSWD:ALL\n", iamUser.Username)), 0644)
 	} else {
 		// nothing to do
@@ -219,13 +226,14 @@ func syncUserSudo(iamUser *IAMUser, defaultSudo bool) error {
 			return nil
 		}
 
+		log.WithField("username", iamUser.Username).Info("Removing sudo from user")
 		return os.Remove(sudoFilename)
 	}
 }
 
 func createUser(iamUser *IAMUser) error {
-	cmd := exec.Command("/usr/sbin/adduser", iamUser.Username)
-	err := cmd.Run()
+	log.WithField("username", iamUser.Username).Info("Creating user")
+	err := RunCommand("/usr/sbin/adduser", iamUser.Username)
 	if err != nil {
 		return err
 	}
