@@ -33,10 +33,17 @@ Every tool supports the standard AWS authentication as well as sts sessions with
 * `--assume-role-arn`: Assume the role before running. This is useful for cross account access.
 * `--mfa-serial-number`: The new session will have its 2FA flag set.
 * `--mfa-token-code`: The token code to use when using `--mfa-serial-number`. If not provided the tool will prompt for it.
+* `--session-duration`: The length of the session, for example `--session-duration=1h`
 
 ## Releases
 
-The releases are only available for linux amd64 at the moment.
+All tools are available under different formats on the [release page](https://github.com/hamstah/awstools/releases).
+- Linux binaries (All tools)
+- MacOS binaries (Most tools)
+- `.deb` package
+- `.rpm` package
+
+Check the release tab for the latest release.
 
 ### Checking release signatures
 
@@ -44,11 +51,12 @@ Download the signature from the release and use GPG to verify it
 
 ```
 #!/usr/bin/env bash
-version=5.0
-
-wget https://github.com/hamstah/awstools/releases/download/v${version}/ec2-ip-from-name
-wget https://github.com/hamstah/awstools/releases/download/v${version}/ec2-ip-from-name.asc
-gpg --verify ec2-ip-from-name.asc ec2-ip-from-name
+version=7.4.0
+os=linux
+arch=amd64
+wget https://github.com/hamstah/awstools/releases/download/v${version}/aws-dump_${version}_${os}_${arch} -O aws-dump
+wget https://github.com/hamstah/awstools/releases/download/v${version}/aws-dump_${version}_${os}_${arch}.asc -O aws-dump.asc
+gpg --verify aws-dump.asc aws-dump
 ```
 
 The signing key is
@@ -62,7 +70,7 @@ Primary key fingerprint: 5FC5 40A9 A2F2 B87B 9C49  3D9E 7D40 F516 7D5C 7058
 * Get the `SHA256SUMS` files
   ```
   #!/usr/bin/env bash
-  version=5.0
+  version=7.4.0
 
   wget https://github.com/hamstah/awstools/releases/download/v${version}/SHA256SUMS
   wget https://github.com/hamstah/awstools/releases/download/v${version}/SHA256SUMS.asc
