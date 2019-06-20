@@ -154,7 +154,5 @@ func executeCommand(command *[]string, conf *aws.Config, creds *credentials.Valu
 	p.Stdout = os.Stdout
 	p.Run()
 
-	// TODO: When https://github.com/golang/go/commit/be94dac4e945a2921b116761e41f1c22f0af2add is released, replace the below with
-	//return common.GetExitCode(p, err)
 	return p.ProcessState.ExitCode()
 }
