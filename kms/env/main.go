@@ -5,10 +5,14 @@ import (
 	"encoding/base64"
 	"encoding/gob"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
+	"reflect"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
@@ -28,6 +32,8 @@ var (
 	secretsManagerPrefix       = kingpin.Flag("secrets-manager-prefix", "Prefix for the secrets manager environment variables").Default("SECRETS_MANAGER_").String()
 	secretsManagerVersionStage = kingpin.Flag("secrets-manager-version-stage", "The version stage of secrets from secrets manager").Default("AWSCURRENT").String()
 	refreshInterval            = kingpin.Flag("refresh-interval", "Refresh interval").Default("0").Duration()
+	refreshAction              = kingpin.Flag("refresh-action", "Action to take when values have changed").Default("RESTART").Enum("RESTART", "EXIT")
+	refreshMaxRetries          = kingpin.Flag("refresh-max-retries", "Number of retries when failing to refresh the config").Default("5").Int()
 )
 
 type Source struct {
@@ -38,6 +44,26 @@ type Source struct {
 type Config struct {
 	Sources           map[string][]Source
 	StaticEnvironment map[string]string
+}
+
+func (c *Config) IsRefreshable() bool {
+	return len(c.Sources) > 0
+}
+
+func (c *Config) RefreshWithRetries() (map[string]string, error) {
+
+	wait := 2
+
+	for i := 0; i < *refreshMaxRetries; i++ {
+		result, err := c.Refresh()
+		if err == nil {
+			return result, nil
+		}
+
+		wait = wait * 2
+		time.Sleep(time.Duration(wait) * time.Second)
+	}
+	return nil, errors.New("Failed to refresh config")
 }
 
 func (c *Config) Refresh() (map[string]string, error) {
@@ -59,7 +85,7 @@ func (c *Config) Refresh() (map[string]string, error) {
 						env[key] = value
 					}
 				} else {
-					value, err := ssmFetch(ssmClient, source.Identifier)
+					value, err := ssmGetParameter(ssmClient, source.Identifier)
 					if err != nil {
 						return nil, err
 					}
@@ -69,7 +95,7 @@ func (c *Config) Refresh() (map[string]string, error) {
 		case "SECRETS_MANAGER":
 			secretsManagerClient := secretsmanager.New(session, conf)
 			for _, source := range sources {
-				values, err := fetchSecret(secretsManagerClient, source.Identifier, source.Name)
+				values, err := secretsManagerGetSecretValue(secretsManagerClient, source.Identifier, source.Name)
 				if err != nil {
 					return nil, err
 				}
@@ -94,6 +120,32 @@ func (c *Config) Refresh() (map[string]string, error) {
 	}
 
 	return env, nil
+}
+
+func Monitor(config *Config, comm chan<- map[string]string) {
+	previous, err := config.RefreshWithRetries()
+	if err != nil {
+		comm <- nil
+		return
+	}
+	comm <- previous
+
+	if !config.IsRefreshable() || *refreshInterval == time.Duration(0) {
+		return
+	}
+
+	for _ = range time.Tick(*refreshInterval) {
+		new, err := config.RefreshWithRetries()
+		if err != nil {
+			comm <- nil
+			return
+		}
+
+		if !reflect.DeepEqual(new, previous) {
+			comm <- new
+		}
+		previous = new
+	}
 }
 
 func ParseConfig(env []string) (*Config, error) {
@@ -155,21 +207,50 @@ func main() {
 	config, err := ParseConfig(env)
 	common.FatalOnError(err)
 
-	envMap, err := config.Refresh()
-	common.FatalOnError(err)
-	var pEnv []string
-	for key, value := range envMap {
-		pEnv = append(pEnv, fmt.Sprintf("%s=%s", key, value))
+	comm := make(chan map[string]string, 1)
+	go Monitor(config, comm)
+
+	var p *exec.Cmd
+
+	waitingPid := -1
+
+	for envMap := range comm {
+		if envMap == nil {
+			// failed to refresh config, don't kill the process
+			// stay alive even if config potentially out of date is better than a crash
+			continue
+		}
+
+		if p != nil {
+			waitingPid = p.Process.Pid
+			p.Process.Signal(syscall.SIGTERM)
+			p.Wait()
+
+			if *refreshAction == "EXIT" {
+				os.Exit(0)
+			}
+		}
+
+		var pEnv []string
+		for key, value := range envMap {
+			pEnv = append(pEnv, fmt.Sprintf("%s=%s", key, value))
+		}
+
+		p = exec.Command((*command)[0], (*command)[1:]...)
+		p.Env = pEnv
+		p.Stdin = os.Stdin
+		p.Stderr = os.Stderr
+		p.Stdout = os.Stdout
+		err := p.Start()
+		common.FatalOnError(err)
+
+		go func(p *exec.Cmd) {
+			p.Wait()
+			if waitingPid != p.Process.Pid {
+				os.Exit(p.ProcessState.ExitCode())
+			}
+		}(p)
 	}
-
-	p := exec.Command((*command)[0], (*command)[1:]...)
-	p.Env = pEnv
-	p.Stdin = os.Stdin
-	p.Stderr = os.Stderr
-	p.Stdout = os.Stdout
-	p.Run()
-
-	os.Exit(p.ProcessState.ExitCode())
 }
 
 func getParametersByPath(client *ssm.SSM, path string, prefix string) (map[string]string, error) {
@@ -220,7 +301,7 @@ type payload struct {
 	Message []byte
 }
 
-func ssmFetch(ssmClient *ssm.SSM, name string) (string, error) {
+func ssmGetParameter(ssmClient *ssm.SSM, name string) (string, error) {
 	res, err := ssmClient.GetParameter(&ssm.GetParameterInput{
 		Name:           aws.String(name),
 		WithDecryption: aws.Bool(true),
@@ -255,7 +336,7 @@ func kmsDecrypt(kmsClient *kms.KMS, ciphertext string) (string, error) {
 	return string(plaintext), nil
 }
 
-func fetchSecret(secretsManagerClient *secretsmanager.SecretsManager, secretName, prefix string) (map[string]string, error) {
+func secretsManagerGetSecretValue(secretsManagerClient *secretsmanager.SecretsManager, secretName, prefix string) (map[string]string, error) {
 	result, err := secretsManagerClient.GetSecretValue(&secretsmanager.GetSecretValueInput{
 		SecretId:     aws.String(secretName),
 		VersionStage: secretsManagerVersionStage,
