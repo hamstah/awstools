@@ -9,8 +9,10 @@ Collection of tools to make working with AWS a bit easier without having to depe
 | [aws-dump](aws/dump)                                     | Dumps (a subset of) AWS resources metadata to JSON and optionally check if they are in terraform state.         |
 | [iam-session](iam/session/)                              | Creates new IAM session with role assumption and MFA support.                                                   |
 | [iam-public-keys](iam/public-ssh-keys)                   | Returns the public SSH keys of an IAM user.                                                                     |
-| [iam-auth-proxy](iam/auth-proxy)                         | Use IAM as identity provider for services.                                                                      |
 | [iam-sync-users](iam/sync-users)                         | Create Linux users from IAM                                                                                     |
+| [iam-request-ssh-key-signature](iam/request-ssh-key)     | Request SSH key signature from a CA managed by `lambda-sign-ssh-key`.                                           |
+| [lambda-sign-ssh-key](lambda/sign-ssh-key)               | Sign SSH keys from a CA using the caller's identity to set the principals.                                      |
+| [iam-auth-proxy](iam/auth-proxy)                         | Use IAM as identity provider for services.                                                                      |
 | [cloudwatch-put-metric-data](cloudwatch/put-metric-data) | Basic sending a metric value to cloudwatch                                                                      |
 | [ec2-describe-instances](ec2/describe-instances)         | Describe EC2 instances by id or filter                                                                          |
 | [ec2-ip-from-name](ec2/ip-from-name)                     | Given an EC2 name, list up to `-max-results` IPs associated with instances with that name                       |

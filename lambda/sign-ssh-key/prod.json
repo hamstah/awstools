@@ -1,0 +1,8 @@
+{
+    "ca": "secrets-manager://sign-ssh-key-ca",
+    "validity_max_duration": 200,
+    "source_addreses": [
+      "127.0.0.1/32",
+      "172.17.0.0/16"
+    ]
+}
