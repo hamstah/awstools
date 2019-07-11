@@ -34,7 +34,7 @@ func main() {
 	}
 
 	if len(*command) == 0 && len(*saveProfileName) == 0 {
-		common.Fatalln("Use at least one of command or --save-profile-name")
+		common.Fatalln("Use at least one of command or --save-profile")
 	}
 
 	session, conf := common.OpenSession(flags)
@@ -65,6 +65,9 @@ func main() {
 func saveProfile(conf *aws.Config, creds *credentials.Value) {
 	// update the credentials file
 	credsFilename := os.ExpandEnv("$HOME/.aws/credentials")
+	if os.ExpandEnv("$AWS_SHARED_CREDENTIALS_FILE") != "" {
+		credsFilename = os.ExpandEnv("$AWS_SHARED_CREDENTIALS_FILE")
+	}
 	credsCfg, err := ini.Load(credsFilename)
 	common.FatalOnError(err)
 
@@ -95,6 +98,9 @@ func saveProfile(conf *aws.Config, creds *credentials.Value) {
 
 	// update the config file
 	configFilename := os.ExpandEnv("$HOME/.aws/config")
+	if os.ExpandEnv("$AWS_CONFIG_FILE") != "" {
+		configFilename = os.ExpandEnv("$AWS_CONFIG_FILE")
+	}
 	configCfg, err := ini.Load(configFilename)
 	common.FatalOnError(err)
 
