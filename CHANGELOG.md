@@ -1,5 +1,11 @@
 # Changelog
 
+## v7.5.0 (2019-07-12)
+
+**New**
+
+* `iam-session`: Added support for `AWS_CONFIG_FILE` and `AWS_SHARED_CREDENTIALS_FILE`
+
 ## v7.4.0 (2019-04-09)
 
 **New**
