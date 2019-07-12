@@ -5,6 +5,7 @@
 **New**
 
 * `iam-session`: Added support for `AWS_CONFIG_FILE` and `AWS_SHARED_CREDENTIALS_FILE`
+* `kms-env`: Added refreshing the environment with `--refresh-action`, `--refresh-interval` and `--refresh-max-retries`
 
 ## v7.4.0 (2019-04-09)
 
