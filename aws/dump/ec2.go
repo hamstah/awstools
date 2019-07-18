@@ -17,6 +17,7 @@ var (
 			"security-groups": EC2ListSecurityGroups,
 			"images":          EC2ListImages,
 			"instances":       EC2ListInstances,
+			"nat-gateways":    EC2ListNATGateways,
 		},
 	}
 )
@@ -180,4 +181,30 @@ func EC2ListInstances(session *Session) *ReportResult {
 		})
 
 	return &ReportResult{instances, err}
+}
+
+func EC2ListNATGateways(session *Session) *ReportResult {
+
+	client := ec2.New(session.Session, session.Config)
+
+	resources := []Resource{}
+	err := client.DescribeNatGatewaysPages(&ec2.DescribeNatGatewaysInput{},
+		func(page *ec2.DescribeNatGatewaysOutput, lastPage bool) bool {
+			for _, natGateway := range page.NatGateways {
+				resource := Resource{
+					ID:        *natGateway.NatGatewayId,
+					ARN:       "",
+					AccountID: session.AccountID,
+					Service:   "ec2",
+					Type:      "nat-gateway",
+					Region:    *session.Config.Region,
+					Metadata:  structs.Map(natGateway),
+				}
+				resources = append(resources, resource)
+			}
+
+			return true
+		})
+
+	return &ReportResult{resources, err}
 }
