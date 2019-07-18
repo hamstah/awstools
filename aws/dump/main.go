@@ -12,9 +12,6 @@ import (
 )
 
 var (
-	flags     = common.KingpinSessionFlags()
-	infoFlags = common.KingpinInfoFlags()
-
 	accountsConfig         = kingpin.Flag("accounts-config", "Configuration file with the accounts to list resources for.").Short('c').Required().String()
 	terraformBackendConfig = kingpin.Flag("terraform-backends-config", "Configuration file with the terraform backends to compare with.").Short('t').String()
 	output                 = kingpin.Flag("output", "Filename to store the results in.").Short('o').Required().String()
@@ -25,8 +22,7 @@ var (
 func main() {
 	kingpin.CommandLine.Name = "aws-dump"
 	kingpin.CommandLine.Help = "Dump AWS resources"
-	kingpin.Parse()
-	common.HandleInfoFlags(infoFlags)
+	common.HandleFlags()
 
 	accounts, err := NewAccounts(*accountsConfig)
 	common.FatalOnError(err)

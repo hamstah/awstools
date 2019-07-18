@@ -14,8 +14,6 @@ import (
 )
 
 var (
-	flags       = common.KingpinSessionFlags()
-	infoFlags   = common.KingpinInfoFlags()
 	filter      = kingpin.Flag("filter", "The filter to use for the identifiers. eg tag:Name").String()
 	identifiers = kingpin.Arg("identifiers", "If omitted the instance is fetched from the EC2 metadata.").Strings()
 )
@@ -47,8 +45,7 @@ type Result struct {
 func main() {
 	kingpin.CommandLine.Name = "ec2-describe-instances"
 	kingpin.CommandLine.Help = "Returns metadata of one or more EC2 instances"
-	kingpin.Parse()
-	common.HandleInfoFlags(infoFlags)
+	flags := common.HandleFlags()
 
 	session, conf := common.OpenSession(flags)
 

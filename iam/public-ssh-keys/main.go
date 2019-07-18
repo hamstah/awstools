@@ -15,18 +15,15 @@ import (
 )
 
 var (
-	flags     = common.KingpinSessionFlags()
-	infoFlags = common.KingpinInfoFlags()
-	username  = kingpin.Flag("username", "Username to fetch the keys for, otherwise default to the logged in user.").Short('u').String()
-	encoding  = kingpin.Flag("key-encoding", "Encoding of the key to return (SSH or PEM)").Default("SSH").Enum("PEM", "SSH")
-	groups    = kingpin.Flag("allowed-group", "Fetch the keys only if the user is in this group. You can use --allowed-group multiple times.").Strings()
+	username = kingpin.Flag("username", "Username to fetch the keys for, otherwise default to the logged in user.").Short('u').String()
+	encoding = kingpin.Flag("key-encoding", "Encoding of the key to return (SSH or PEM)").Default("SSH").Enum("PEM", "SSH")
+	groups   = kingpin.Flag("allowed-group", "Fetch the keys only if the user is in this group. You can use --allowed-group multiple times.").Strings()
 )
 
 func main() {
 	kingpin.CommandLine.Name = "iam-public-ssh-keys"
 	kingpin.CommandLine.Help = "Return public SSH keys for an IAM user."
-	kingpin.Parse()
-	common.HandleInfoFlags(infoFlags)
+	flags := common.HandleFlags()
 
 	session := session.Must(session.NewSession())
 	conf := common.AssumeRoleConfig(flags, session)

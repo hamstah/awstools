@@ -12,8 +12,6 @@ import (
 )
 
 var (
-	flags         = common.KingpinSessionFlags()
-	infoFlags     = common.KingpinInfoFlags()
 	containerName = kingpin.Flag("container-name", "ECS container name").Required().String()
 	containerPort = kingpin.Flag("container-port", "ECS container port").Required().Int64()
 	cluster       = kingpin.Flag("cluster", "ECS cluster").Required().String()
@@ -23,8 +21,7 @@ var (
 func main() {
 	kingpin.CommandLine.Name = "ecs-locate"
 	kingpin.CommandLine.Help = "Find an instance/port for a service"
-	kingpin.Parse()
-	common.HandleInfoFlags(infoFlags)
+	flags := common.HandleFlags()
 
 	session, conf := common.OpenSession(flags)
 

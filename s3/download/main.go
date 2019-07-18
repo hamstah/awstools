@@ -10,18 +10,15 @@ import (
 )
 
 var (
-	flags     = common.KingpinSessionFlags()
-	infoFlags = common.KingpinInfoFlags()
-	bucket    = kingpin.Flag("bucket", "Name of the bucket").Required().String()
-	key       = kingpin.Flag("key", "Key to download").Required().String()
-	filename  = kingpin.Flag("filename", "Output filename").Required().String()
+	bucket   = kingpin.Flag("bucket", "Name of the bucket").Required().String()
+	key      = kingpin.Flag("key", "Key to download").Required().String()
+	filename = kingpin.Flag("filename", "Output filename").Required().String()
 )
 
 func main() {
 	kingpin.CommandLine.Name = "s3-download"
 	kingpin.CommandLine.Help = "Download a file from S3."
-	kingpin.Parse()
-	common.HandleInfoFlags(infoFlags)
+	flags := common.HandleFlags()
 
 	session, conf := common.OpenSession(flags)
 

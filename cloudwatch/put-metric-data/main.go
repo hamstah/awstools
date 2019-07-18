@@ -8,8 +8,6 @@ import (
 )
 
 var (
-	flags      = common.KingpinSessionFlags()
-	infoFlags  = common.KingpinInfoFlags()
 	metricName = kingpin.Flag("metric-name", "Name of the Cloudwatch metric").Required().String()
 	namespace  = kingpin.Flag("namespace", "Name of the Cloudwatch namespace").Required().String()
 	dimensions = kingpin.Flag("dimension", "Dimensions name=value").StringMap()
@@ -19,8 +17,7 @@ var (
 func main() {
 	kingpin.CommandLine.Name = "cloudwatch-put-metric-data"
 	kingpin.CommandLine.Help = "Put a cloudwatch metric value."
-	kingpin.Parse()
-	common.HandleInfoFlags(infoFlags)
+	flags := common.HandleFlags()
 
 	session, conf := common.OpenSession(flags)
 

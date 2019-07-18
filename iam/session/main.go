@@ -15,8 +15,6 @@ import (
 )
 
 var (
-	flags            = common.KingpinSessionFlags()
-	infoFlags        = common.KingpinInfoFlags()
 	quiet            = kingpin.Flag("quiet", "Do not output anything").Short('q').Default("false").Bool()
 	saveProfileName  = kingpin.Flag("save-profile", "Save the profile in the AWS credentials storage").Short('s').String()
 	overwriteProfile = kingpin.Flag("overwrite-profile", "Overwrite the profile if it already exists").Default("false").Bool()
@@ -26,8 +24,7 @@ var (
 func main() {
 	kingpin.CommandLine.Name = "iam-session"
 	kingpin.CommandLine.Help = "Start a new session under a different role."
-	kingpin.Parse()
-	common.HandleInfoFlags(infoFlags)
+	flags := common.HandleFlags()
 
 	if len(*flags.RoleArn) == 0 && len(*saveProfileName) != 0 && len(*flags.MFASerialNumber) == 0 {
 		common.Fatalln("--save-profile can only be used with --assume-role-arn or --mfa-serial-number")

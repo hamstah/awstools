@@ -24,8 +24,6 @@ import (
 )
 
 var (
-	flags                      = common.KingpinSessionFlags()
-	infoFlags                  = common.KingpinInfoFlags()
 	command                    = kingpin.Arg("command", "Command to run, prefix with -- to pass args").Required().Strings()
 	kmsPrefix                  = kingpin.Flag("kms-prefix", "Prefix for the KMS environment variables").Default("KMS_").String()
 	ssmPrefix                  = kingpin.Flag("ssm-prefix", "Prefix for the SSM environment variables").Default("SSM_").String()
@@ -50,12 +48,12 @@ func (c *Config) IsRefreshable() bool {
 	return len(c.Sources) > 0
 }
 
-func (c *Config) RefreshWithRetries() (map[string]string, error) {
+func (c *Config) RefreshWithRetries(flags *common.SessionFlags) (map[string]string, error) {
 
 	wait := 2
 
 	for i := 0; i < *refreshMaxRetries; i++ {
-		result, err := c.Refresh()
+		result, err := c.Refresh(flags)
 		if err == nil {
 			return result, nil
 		}
@@ -66,7 +64,7 @@ func (c *Config) RefreshWithRetries() (map[string]string, error) {
 	return nil, errors.New("Failed to refresh config")
 }
 
-func (c *Config) Refresh() (map[string]string, error) {
+func (c *Config) Refresh(flags *common.SessionFlags) (map[string]string, error) {
 	env := map[string]string{}
 
 	session, conf := common.OpenSession(flags)
@@ -122,8 +120,8 @@ func (c *Config) Refresh() (map[string]string, error) {
 	return env, nil
 }
 
-func Monitor(config *Config, comm chan<- map[string]string) {
-	previous, err := config.RefreshWithRetries()
+func Monitor(flags *common.SessionFlags, config *Config, comm chan<- map[string]string) {
+	previous, err := config.RefreshWithRetries(flags)
 	if err != nil {
 		comm <- nil
 		return
@@ -135,7 +133,7 @@ func Monitor(config *Config, comm chan<- map[string]string) {
 	}
 
 	for _ = range time.Tick(*refreshInterval) {
-		new, err := config.RefreshWithRetries()
+		new, err := config.RefreshWithRetries(flags)
 		if err != nil {
 			comm <- nil
 			return
@@ -199,8 +197,7 @@ func ParseConfig(env []string) (*Config, error) {
 func main() {
 	kingpin.CommandLine.Name = "kms-env"
 	kingpin.CommandLine.Help = "Decrypt environment variables encrypted with KMS, SSM or Secret Manager."
-	kingpin.Parse()
-	common.HandleInfoFlags(infoFlags)
+	flags := common.HandleFlags()
 
 	env := os.Environ()
 
@@ -208,7 +205,7 @@ func main() {
 	common.FatalOnError(err)
 
 	comm := make(chan map[string]string, 1)
-	go Monitor(config, comm)
+	go Monitor(flags, config, comm)
 
 	var p *exec.Cmd
 

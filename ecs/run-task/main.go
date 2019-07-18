@@ -8,8 +8,6 @@ import (
 )
 
 var (
-	flags          = common.KingpinSessionFlags()
-	infoFlags      = common.KingpinInfoFlags()
 	taskDefinition = kingpin.Flag("task-definition", "ECS task definition").Required().String()
 	cluster        = kingpin.Flag("cluster", "ECS cluster").Required().String()
 )
@@ -17,8 +15,7 @@ var (
 func main() {
 	kingpin.CommandLine.Name = "ecs-run-task"
 	kingpin.CommandLine.Help = "Run a task on ECS."
-	kingpin.Parse()
-	common.HandleInfoFlags(infoFlags)
+	flags := common.HandleFlags()
 
 	session, conf := common.OpenSession(flags)
 

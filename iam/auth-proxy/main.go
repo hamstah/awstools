@@ -21,8 +21,6 @@ import (
 )
 
 var (
-	flags      = common.KingpinSessionFlags()
-	infoFlags  = common.KingpinInfoFlags()
 	socksProxy = kingpin.Flag("socks-proxy", "Socks proxy host:port to use.").String()
 	bind       = kingpin.Flag("bind", "Address to bind to").Default(":8080").String()
 )
@@ -67,8 +65,7 @@ func setupSocks(p *goproxy.ProxyHttpServer, socksProxy string) error {
 func main() {
 	kingpin.CommandLine.Name = "iam-auth-proxy"
 	kingpin.CommandLine.Help = "Proxy to generate IAM auth token"
-	kingpin.Parse()
-	common.HandleInfoFlags(infoFlags)
+	flags := common.HandleFlags()
 
 	proxy := goproxy.NewProxyHttpServer()
 	proxy.Verbose = false

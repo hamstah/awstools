@@ -11,16 +11,13 @@ import (
 )
 
 var (
-	flags     = common.KingpinSessionFlags()
-	infoFlags = common.KingpinInfoFlags()
-	output    = kingpin.Flag("output", "Return the credentials instead of docker command").Default("shell").Enum("raw", "shell")
+	output = kingpin.Flag("output", "Return the credentials instead of docker command").Default("shell").Enum("raw", "shell")
 )
 
 func main() {
 	kingpin.CommandLine.Name = "ecr-get-login"
 	kingpin.CommandLine.Help = "Returns an authorization token from ECR."
-	kingpin.Parse()
-	common.HandleInfoFlags(infoFlags)
+	flags := common.HandleFlags()
 
 	session, conf := common.OpenSession(flags)
 
