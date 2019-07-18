@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/hamstah/awstools/common"
@@ -25,8 +24,7 @@ func main() {
 	kingpin.CommandLine.Help = "Return public SSH keys for an IAM user."
 	flags := common.HandleFlags()
 
-	session := session.Must(session.NewSession())
-	conf := common.AssumeRoleConfig(flags, session)
+	session, conf := common.OpenSession(flags)
 
 	iamClient := iam.New(session, conf)
 

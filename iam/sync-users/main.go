@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hamstah/awstools/common"
 	log "github.com/sirupsen/logrus"
@@ -40,8 +39,7 @@ func main() {
 	flags := common.HandleFlags()
 	common.FatalOnError(ensureCanCreateUser())
 
-	session := session.Must(session.NewSession())
-	conf := common.AssumeRoleConfig(flags, session)
+	session, conf := common.OpenSession(flags)
 
 	iamClient := iam.New(session, conf)
 
@@ -199,8 +197,8 @@ func syncUserGroups(iamUser *IAMUser) error {
 	groupsStr := strings.Join(iamUser.Groups, ",")
 	log.WithFields(log.Fields{
 		"username": iamUser.Username,
-		"groups": groupsStr,
-		}).Info("Setting user groups")
+		"groups":   groupsStr,
+	}).Info("Setting user groups")
 	return RunCommand("/usr/sbin/usermod", "-G", groupsStr, iamUser.Username)
 }
 
