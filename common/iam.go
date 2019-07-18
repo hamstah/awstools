@@ -117,7 +117,7 @@ func OpenSession(sessionFlags *SessionFlags) (*session.Session, *aws.Config) {
 
 func AssumeRoleConfig(sessionFlags *SessionFlags, sess *session.Session) *aws.Config {
 	conf := NewConfig(*sessionFlags.Region)
-	if *sessionFlags.RoleArn != "" {
+	if sessionFlags.RoleArn != nil && *sessionFlags.RoleArn != "" {
 		var creds *credentials.Credentials
 		creds = stscreds.NewCredentials(sess, *sessionFlags.RoleArn, func(p *stscreds.AssumeRoleProvider) {
 			if *sessionFlags.RoleExternalID != "" {
@@ -142,7 +142,7 @@ func AssumeRoleConfig(sessionFlags *SessionFlags, sess *session.Session) *aws.Co
 			}
 		})
 		conf.Credentials = creds
-	} else if *sessionFlags.MFASerialNumber != "" {
+	} else if sessionFlags.MFASerialNumber != nil && *sessionFlags.MFASerialNumber != "" {
 		conf.Credentials = credentials.NewCredentials(&SessionTokenProvider{
 			SessionFlags: sessionFlags,
 			Session:      sess,

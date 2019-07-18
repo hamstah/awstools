@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/hamstah/awstools/common"
@@ -39,13 +38,13 @@ func main() {
 	sshPublicKeyBytes, err := ioutil.ReadFile(*sshPublicKeyFilename)
 	common.FatalOnError(err)
 
-	session := session.Must(session.NewSession())
-	conf := common.AssumeRoleConfig(flags, session)
-
-	stsClient := sts.New(session, conf)
+	userSession := common.NewSession("")
+	stsClient := sts.New(userSession)
 
 	url, err := common.STSGetIdentityURL(stsClient)
 	common.FatalOnError(err)
+
+	session, conf := common.OpenSession(flags)
 
 	lambdaPayload := LambdaPayload{
 		IdentityURL:     url,
