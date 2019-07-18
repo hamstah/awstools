@@ -9,21 +9,21 @@ Dump AWS resources
 
 Flags:
       --help            Show context-sensitive help (also try --help-long and --help-man).
-      --assume-role-arn=ASSUME-ROLE-ARN  
+      --assume-role-arn=ASSUME-ROLE-ARN
                         Role to assume
-      --assume-role-external-id=ASSUME-ROLE-EXTERNAL-ID  
+      --assume-role-external-id=ASSUME-ROLE-EXTERNAL-ID
                         External ID of the role to assume
-      --assume-role-session-name=ASSUME-ROLE-SESSION-NAME  
+      --assume-role-session-name=ASSUME-ROLE-SESSION-NAME
                         Role session name
       --region=REGION   AWS Region
-      --mfa-serial-number=MFA-SERIAL-NUMBER  
+      --mfa-serial-number=MFA-SERIAL-NUMBER
                         MFA Serial Number
-      --mfa-token-code=MFA-TOKEN-CODE  
+      --mfa-token-code=MFA-TOKEN-CODE
                         MFA Token Code
   -v, --version         Display the version
-  -c, --accounts-config=ACCOUNTS-CONFIG  
+  -c, --accounts-config=ACCOUNTS-CONFIG
                         Configuration file with the accounts to list resources for.
-  -t, --terraform-backends-config=TERRAFORM-BACKENDS-CONFIG  
+  -t, --terraform-backends-config=TERRAFORM-BACKENDS-CONFIG
                         Configuration file with the terraform backends to compare with.
   -o, --output=OUTPUT   Filename to store the results in.
       --only-unmanaged  Only return resources not managed by terraform.
@@ -36,6 +36,7 @@ Flags:
 * EC2
   * VPC
   * Security Groups
+  * NAT gateways
 * IAM (Does not include attachments)
   * Users
   * Access keys
