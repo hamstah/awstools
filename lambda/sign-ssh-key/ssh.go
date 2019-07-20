@@ -76,6 +76,9 @@ func (s Signer) Sign(key []byte, keyId string, principals, sourceAddresses []str
 		CertType:        ssh.UserCert,
 		Permissions: ssh.Permissions{
 			CriticalOptions: criticalOptions,
+			Extensions: map[string]string{
+				"permit-pty": "",
+			},
 		},
 	}
 

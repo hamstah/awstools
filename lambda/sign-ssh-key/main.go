@@ -13,7 +13,7 @@ import (
 var (
 	configFilenameTemplate = kingpin.Flag("config-filename-template", "Filename of the configuration file.").Default("%s.json").String()
 	eventFilename          = kingpin.Flag("event-filename", "Filename with the event payload. Will process the event and exit if present.").String()
-	identityURLMaxAge      = kingpin.Flag("identity-url-max-age", "Maximum age of the identity URL signature").Default("10s").Duration()
+	identityURLMaxAge      = kingpin.Flag("identity-url-max-age", "Maximum age of the identity URL signature.").Default("10s").Duration()
 )
 
 func main() {

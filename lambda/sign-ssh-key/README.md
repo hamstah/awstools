@@ -83,3 +83,14 @@ a role with a policy allowing access to those resources.
 [terraform.tf](./terraform.tf) gives an example of building and deploying the lambda using Secrets Manager to manage the CA
 configuration. Apply terraform then set the fields in Secrets Manager. The private key should be base64 encoded to avoid issues
 with new lines.
+
+## Configuring the SSH servers
+
+* Store the CA public key on your SSH server under `/etc/ssh/ca_user_key.pub`
+* Edit `/etc/ssh/sshd_config` and append the following line `TrustedUserCAKeys /etc/ssh/ca_user_key.pub`
+* Reload the SSH service `sudo /etc/init.d/ssh reload` or `sudo systemctl reload ssh`
+
+## Creating the SSH users
+
+The SSH certificate will use the IAM username as principal so the users need to exist on the SSH server.
+The easiest way to do it is to use [iam-sync-users](../sync-users) on a CRON job.

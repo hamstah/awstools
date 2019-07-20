@@ -61,7 +61,8 @@ resource "aws_iam_role_policy_attachment" "read_ca_secret" {
 resource "null_resource" "build" {
 
   triggers = {
-    build = sha1(file("main.go"))
+    build  = sha1(file("main.go"))
+    config = sha1(file("prod.json"))
   }
 
   provisioner "local-exec" {
