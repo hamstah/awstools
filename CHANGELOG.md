@@ -1,5 +1,14 @@
 # Changelog
 
+## v7.6.0 (2019-07-25)
+
+**New**
+
+* `iam-request-ssh-key-signature`: New tool
+* `lambda-sign-ssh-key`: New tool
+* `aws-dump`: Added new report `ec2:nat-gateways`
+* All tools now use the same flags for log output.
+
 ## v7.5.0 (2019-07-12)
 
 **New**
