@@ -75,6 +75,9 @@ the corresponding prefix
 
 Note that `secret-manager://` and `ssm://` with a wildcard will expand to a json object.
 
+The private key contains new lines which can be an issue with some tools to set the value in Secrets Manager or SSM so
+you can base64 encode it before saving to avoid the issue.
+
 ## Deploying
 
 The lambda function does not need any particular permissions. If you use KMS, Secrets Manager or SSM the lambda needs
