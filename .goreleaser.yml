@@ -106,6 +106,17 @@ builds:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - env:
       - CGO_ENABLED=0
+    main: ./iam/request-ssh-key-signature/
+    binary: iam-request-ssh-key-signature
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
     main: ./iam/sync-users/
     binary: iam-sync-users
     goos:
@@ -196,6 +207,17 @@ builds:
       - CGO_ENABLED=0
     main: ./lambda/ping/
     binary: lambda-ping
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./lambda/sign-ssh-key/
+    binary: lambda-sign-ssh-key
     goos:
       - linux
       - darwin
