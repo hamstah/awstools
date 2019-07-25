@@ -39,7 +39,7 @@ Flags:
 
 ## Setup
 
-Create the [lambda-sign-ssh-key function](../../lamnda/sign-ssh-key) Lambda with the associate config.
+Create the [lambda-sign-ssh-key function](../../lambda/sign-ssh-key) Lambda with the associate config.
 
 ## Usage
 
