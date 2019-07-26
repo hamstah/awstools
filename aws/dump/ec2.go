@@ -17,6 +17,7 @@ var (
 			"security-groups": EC2ListSecurityGroups,
 			"images":          EC2ListImages,
 			"instances":       EC2ListInstances,
+			"key-pairs":       EC2ListKeyPairs,
 		},
 	}
 )
@@ -180,4 +181,28 @@ func EC2ListInstances(session *Session) *ReportResult {
 		})
 
 	return &ReportResult{instances, err}
+}
+
+func EC2ListKeyPairs(session *Session) *ReportResult {
+	client := ec2.New(session.Session, session.Config)
+
+	keypairs := []Resource{}
+
+	res, err := client.DescribeKeyPairs(&ec2.DescribeKeyPairsInput{})
+	if err != nil {
+		return &ReportResult{nil, err}
+	}
+
+	for _, keypair := range res.KeyPairs {
+		keypairs = append(keypairs, Resource{
+			ID:        *keypair.KeyName,
+			Service:   "ec2",
+			Type:      "key-pair",
+			AccountID: session.AccountID,
+			Region:    *session.Config.Region,
+			Metadata:  structs.Map(keypair),
+		})
+	}
+
+	return &ReportResult{keypairs, err}
 }
