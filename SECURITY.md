@@ -12,6 +12,6 @@ Security updates are provided for the current and previous major versions.
 
 ## Reporting a Vulnerability
 
-If you need to report a vulnerability privately, please email security@hamstah.
+If you need to report a vulnerability privately, please send an email to `security@hamstah.com`.
 
 You can use my PGP key from [keybase](https://keybase.io/hamstah).
