@@ -32,22 +32,28 @@ Args:
 
 ## Features
 
-* Scans environment variables with the prefix `--kms-prefix`, `--ssm-prefix` or `--secrets-manager-prefix`, fetches and decrypts the values
+* Scans environment variables with the key prefixes `--kms-prefix`, `--ssm-prefix` or `--secrets-manager-prefix`, fetches and decrypts the values
   then injects them into the environment of the sub command to run.
+* Scans environment variable values with the prefix `kms://`, `ssm://`, `secrets-manager://` or `file://`.
 * KMS values should be base64 encoded in the value of the variable
 * SSM values should be the path to the parameter store parameter. If the path ends in `/*` it will fetch the values
   under that path (non-recursively) and prefix them with the original env var. If the name is prefix with an extra `_`.
   no prefix is used
-* Secret manager values should be the name of the secret. It supports JSON encoded values in either SecretString or SecretBinary and will fetch
-  the AWSCURRENT version by default (override with `--secrets-manager-version-stage`). If JSON keys are upper cased and prefixed with the name of the
-  environment variable excluding the prefix. To not include the prefix, use an extra `_` after the prefix.
+* Secret manager values should be the name of the secret. It supports JSON encoded values in either SecretString or SecretBinary and will fetch the AWSCURRENT version by default (override with `--secrets-manager-version-stage`). JSON keys are upper cased and prefixed with the name of the environment variable excluding the prefix. To not include the prefix, use an extra `_` before the variable name, for example `SSM__A=` or `_A=ssm://...`.
 
 ## Examples
+
+All sources except `file://` are supported as both key prefixes (`KMS_A`) or value prefixes (`A=kms://...`).
 
 ### KMS
 
 ```
+# key prefix
 export KMS_A=<base64>
+
+# value prefix
+export A=kms://<base54>
+
 kms-env program
 ```
 
@@ -57,7 +63,12 @@ its value set to the decrypted value of `KMS_A`. `KMS_A` is not passed to the ch
 ### SSM Single parameter
 
 ```
+# key prefix
 export SSM_B=/path/to/value
+
+# value prefix
+export B=ssm:///path/to/value
+
 kms-env program
 ```
 
@@ -74,7 +85,12 @@ Assuming the following parameters exist
 ```
 
 ```
+# key prefix
 export SSM_C=/path/to/values/*
+
+# value prefix
+export C=ssm:///path/to/values/*
+
 kms-env program
 ```
 
@@ -87,7 +103,12 @@ Similar to the previous case, but the environment will have the following variab
 Use a double `_` to ignore the prefix
 
 ```
-export SSM_C=/path/to/values/*
+# key prefix
+export SSM__C=/path/to/values/*
+
+# value prefix
+export _C=ssm:///path/to/values/*
+
 kms-env program
 ```
 
@@ -95,7 +116,7 @@ Will have
 * `FOO_BAR`
 * `FLIP`
 
-If multiple variables have a double `_` they all get merged. (Note: there is no guarantee of the order in which they are processed)
+If multiple variables have a double `_` they all get merged. (Note: there is no guarantee of the order in which they are processed).
 
 ### Secrets Manager with prefix
 
@@ -105,7 +126,12 @@ Assuming the secret `name/of/secret` exists
 ```
 
 ```
+# key prefix
 export SECRETS_MANAGER_ABC=name/of/secret
+
+# value prefix
+ABC=secrets-manager://name/of/secret
+
 kms-env program
 ```
 
@@ -115,13 +141,29 @@ Will have
 
 ### Secrets Manager without prefix
 
-Add an extra `_` in the environment variable name
+Add an extra `_` in the environment variable name:
 
 ```
+# key prefix
 export SECRETS_MANAGER__ABC=name/of/secret
+
+# value prefix
+export _ABC=name/of/secret
+
 kms-env program
 ```
 
 Will have
 * `FOO=123`
 * `BAR=test`
+
+### Load a file
+
+```
+# value prefix
+export ABC=file:///path/to/file
+
+kms-env program
+```
+
+Will have the content of /path/to/file in the ABC environment variable.

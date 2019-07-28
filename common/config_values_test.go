@@ -202,6 +202,30 @@ func TestResolveSSMKeyPrefixesWildcard(t *testing.T) {
 	assert.Equal(t, "value-2", d.A.Value2)
 }
 
+type Struct2 struct {
+	Value1 string `json:"key-1"`
+	Value2 string `json:"key-2"`
+	Value3 string `json:"key-3"`
+	Value4 string `json:"key-4"`
+}
+
+func TestResolveSSMKeyPrefixesWildcardWithoutPrefix(t *testing.T) {
+	data := `{
+    "SSM__a": "/hamstah/awstools/tests/test-1/*"
+  }
+  `
+	c, err := setFromMap(data)
+	require.NoError(t, err)
+	assert.Equal(t, Source{Type: "SSM", Name: "a", Identifier: "/hamstah/awstools/tests/test-1/*", Collapse: true}, c.Static["a"])
+
+	d := Struct2{}
+	err = c.Refresh(sess, conf, &d)
+	require.NoError(t, err)
+
+	assert.Equal(t, "value-1", d.Value1)
+	assert.Equal(t, "value-2", d.Value2)
+}
+
 type SecretManager1 struct {
 	A struct {
 		Value1 string `json:"key-1"`
@@ -235,6 +259,45 @@ func TestResolveSecretsManagerValuePrefixes(t *testing.T) {
 
 	assert.Equal(t, "value-1", d.B.C.Value1)
 	assert.Equal(t, "value-2", d.B.C.Value2)
+}
+
+func TestResolveSecretsManagerValuePrefixWithoutPrefix(t *testing.T) {
+	data := `{
+		"_a": "secrets-manager://hamstah/awstools/tests/test-1"
+  	}
+	  `
+
+	c, err := setFromMap(data)
+	require.NoError(t, err)
+	assert.Equal(t, Source{Type: "SECRETS_MANAGER", Name: "a", Identifier: "hamstah/awstools/tests/test-1", Collapse: true}, c.Static["a"])
+
+	d := Struct2{}
+	err = c.Refresh(sess, conf, &d)
+	require.NoError(t, err)
+
+	assert.Equal(t, "value-1", d.Value1)
+	assert.Equal(t, "value-2", d.Value2)
+}
+
+func TestSecretsManagerWithoutPrefix(t *testing.T) {
+
+	data := `{
+		"SECRETS_MANAGER__a": "hamstah/awstools/tests/test-1",
+		"_B": "secrets-manager://hamstah/awstools/tests/test-2"
+	}
+	`
+	config, err := setFromMap(data)
+	require.NoError(t, err)
+
+	fmt.Println(config.Static)
+	assert.Equal(t, Source{Type: "SECRETS_MANAGER", Name: "a", Identifier: "hamstah/awstools/tests/test-1", Collapse: true}, config.Static["a"])
+	assert.Equal(t, Source{Type: "SECRETS_MANAGER", Name: "B", Identifier: "hamstah/awstools/tests/test-2", Collapse: true}, config.Static["B"])
+
+	d := Struct2{}
+	err = config.Refresh(sess, conf, &d)
+	require.NoError(t, err)
+
+	assert.Equal(t, "value-1", d.Value1)
 }
 
 func TestResolveSecretsManagerKeyPrefixes(t *testing.T) {
@@ -310,4 +373,20 @@ func TestEncryptDecryptKMSWithSecretBox(t *testing.T) {
 	decrypted, err := DecryptWithKMS(kmsClient, encrypted)
 	require.NoError(t, err)
 	assert.Equal(t, plaintext, decrypted)
+}
+
+func TestFlattenMapNested(t *testing.T) {
+	m := map[string]interface{}{
+		"a": map[string]interface{}{
+			"b": map[string]interface{}{
+				"c":   "abc",
+				"d-e": "def",
+			},
+		},
+	}
+
+	flat, err := FlattenMap(m)
+	require.NoError(t, err)
+	assert.Equal(t, "abc", flat["A_B_C"])
+	assert.Equal(t, "def", flat["A_B_D_E"])
 }
