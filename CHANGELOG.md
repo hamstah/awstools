@@ -1,5 +1,13 @@
 # Changelog
 
+## v7.7.0 (2019-07-28)
+
+**New**
+
+* `kms-env`: Added support for value prefixes (`ssm://`, `secrets-manager://`, `kms://` and `file://`)
+* `aws-dump`: Added the `ec2:key-pairs`.
+
+
 ## v7.6.0 (2019-07-25)
 
 **New**
