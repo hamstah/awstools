@@ -9,7 +9,8 @@ var (
 	AutoScalingService = Service{
 		Name: "autoscaling",
 		Reports: map[string]Report{
-			"groups": AutoScalingListGroups,
+			"groups":                AutoScalingListGroups,
+			"launch-configurations": AutoScalingListLaunchConfigurations,
 		},
 	}
 )
@@ -30,6 +31,32 @@ func AutoScalingListGroups(session *Session) *ReportResult {
 					Type:      "group",
 					Region:    *session.Config.Region,
 					Metadata:  structs.Map(autoScalingGroup),
+				}
+				resources = append(resources, resource)
+			}
+
+			return true
+		})
+
+	return &ReportResult{resources, err}
+}
+
+func AutoScalingListLaunchConfigurations(session *Session) *ReportResult {
+
+	client := autoscaling.New(session.Session, session.Config)
+
+	resources := []Resource{}
+	err := client.DescribeLaunchConfigurationsPages(&autoscaling.DescribeLaunchConfigurationsInput{},
+		func(page *autoscaling.DescribeLaunchConfigurationsOutput, lastPage bool) bool {
+			for _, launchConfiguration := range page.LaunchConfigurations {
+				resource := Resource{
+					ID:        *launchConfiguration.LaunchConfigurationName,
+					ARN:       *launchConfiguration.LaunchConfigurationARN,
+					AccountID: session.AccountID,
+					Service:   "autoscaling",
+					Type:      "launch-configuration",
+					Region:    *session.Config.Region,
+					Metadata:  structs.Map(launchConfiguration),
 				}
 				resources = append(resources, resource)
 			}
