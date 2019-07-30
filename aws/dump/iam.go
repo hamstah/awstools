@@ -17,6 +17,7 @@ var (
 			"roles":                 IAMListRoles,
 			"policies":              IAMListPolicies,
 			"groups":                IAMListGroups,
+			"instance-profiles":     IAMListInstanceProfiles,
 		},
 	}
 )
@@ -238,4 +239,30 @@ func AttachServiceLastAccessedDetails(client *iam.IAM, result *ReportResult, job
 		}
 		i += 1
 	}
+}
+
+func IAMListInstanceProfiles(session *Session) *ReportResult {
+
+	client := iam.New(session.Session, session.Config)
+
+	resources := []Resource{}
+	err := client.ListInstanceProfilesPages(&iam.ListInstanceProfilesInput{},
+		func(page *iam.ListInstanceProfilesOutput, lastPage bool) bool {
+			for _, instanceProfile := range page.InstanceProfiles {
+				resource := Resource{
+					ID:        *instanceProfile.InstanceProfileId,
+					ARN:       *instanceProfile.Arn,
+					AccountID: session.AccountID,
+					Service:   "iam",
+					Type:      "instance-profile",
+					Region:    *session.Config.Region,
+					Metadata:  structs.Map(instanceProfile),
+				}
+				resources = append(resources, resource)
+			}
+
+			return true
+		})
+
+	return &ReportResult{resources, err}
 }
