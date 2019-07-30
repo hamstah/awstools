@@ -14,7 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/hamstah/awstools/common"
 	"github.com/hashicorp/terraform/states"
-	"github.com/hashicorp/terraform/states/statefile"
+	"github.com/hashicorp/terraform/terraform"
 )
 
 type Substitution struct {
@@ -173,12 +173,12 @@ func LoadStateFromFile(filename string) ([]*Resource, error) {
 	if err != nil {
 		return nil, err
 	}
-	state, err := statefile.Read(reader)
+	state, err := terraform.ReadState(reader)
 	if err != nil {
 		return nil, err
 	}
 
-	filter := &states.Filter{State: state.State}
+	filter := &terraform.StateFilter{State: state}
 	results, err := filter.Filter()
 	for _, result := range results {
 		switch result.Value.(type) {
