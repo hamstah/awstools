@@ -102,9 +102,7 @@ func worker(id int, jobs <-chan Job, results chan<- *ReportResult) {
 	}
 }
 
-func Run(jobs []Job) []Resource {
-	resources := []Resource{}
-
+func Run(jobs []Job) ([]Resource, []error) {
 	jobsChan := make(chan Job, len(jobs))
 	results := make(chan *ReportResult, len(jobs))
 
@@ -117,11 +115,15 @@ func Run(jobs []Job) []Resource {
 	}
 	close(jobsChan)
 
+	resources := []Resource{}
+	errors := []error{}
 	for i := 0; i < len(jobs); i++ {
 		result := <-results
 		if result.Error == nil {
 			resources = append(resources, result.Resources...)
+		} else {
+			errors = append(errors, result.Error)
 		}
 	}
-	return resources
+	return resources, errors
 }

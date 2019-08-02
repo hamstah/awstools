@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hamstah/awstools/common"
+	log "github.com/sirupsen/logrus"
 
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
@@ -70,7 +71,7 @@ func main() {
 		}
 	}
 
-	resources := Run(jobs)
+	resources, errors := Run(jobs)
 
 	report := []Resource{}
 	if *terraformBackendConfig != "" {
@@ -100,6 +101,10 @@ func main() {
 
 	} else {
 		report = resources
+	}
+
+	for _, err := range errors {
+		log.Error(err)
 	}
 
 	reportJSON, err := json.MarshalIndent(report, "", "  ")
