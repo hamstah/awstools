@@ -13,12 +13,13 @@ var (
 	EC2Service = Service{
 		Name: "ec2",
 		Reports: map[string]Report{
-			"vpcs":            EC2ListVpcs,
-			"security-groups": EC2ListSecurityGroups,
-			"images":          EC2ListImages,
-			"instances":       EC2ListInstances,
-			"nat-gateways":    EC2ListNATGateways,
-			"key-pairs":       EC2ListKeyPairs,
+			"vpcs":             EC2ListVpcs,
+			"security-groups":  EC2ListSecurityGroups,
+			"images":           EC2ListImages,
+			"instances":        EC2ListInstances,
+			"launch-templates": EC2ListLaunchTemplates,
+			"nat-gateways":     EC2ListNATGateways,
+			"key-pairs":        EC2ListKeyPairs,
 		},
 	}
 )
@@ -232,4 +233,68 @@ func EC2ListKeyPairs(session *Session) *ReportResult {
 	}
 
 	return &ReportResult{keypairs, err}
+}
+
+func EC2ListLaunchTemplates(session *Session) *ReportResult {
+
+	client := ec2.New(session.Session, session.Config)
+
+	resources := []Resource{}
+	result := &ReportResult{
+		Resources: resources,
+	}
+	err := client.DescribeLaunchTemplatesPages(&ec2.DescribeLaunchTemplatesInput{},
+		func(page *ec2.DescribeLaunchTemplatesOutput, lastPage bool) bool {
+			for _, launchTemplate := range page.LaunchTemplates {
+				resource := Resource{
+					ID:        *launchTemplate.LaunchTemplateId,
+					ARN:       "",
+					AccountID: session.AccountID,
+					Service:   "ec2",
+					Type:      "launch-template",
+					Region:    *session.Config.Region,
+					Metadata:  structs.Map(launchTemplate),
+				}
+				result.Resources = append(result.Resources, resource)
+
+				launchTemplateVersions := EC2ListLaunchTemplateVersions(session, *launchTemplate.LaunchTemplateId)
+				if launchTemplateVersions.Error != nil {
+					result.Error = launchTemplateVersions.Error
+					return false
+				}
+				result.Resources = append(result.Resources, launchTemplateVersions.Resources...)
+			}
+
+			return true
+		})
+
+	if err != nil {
+		result.Error = err
+	}
+
+	return result
+}
+
+func EC2ListLaunchTemplateVersions(session *Session, launchTemplateID string) *ReportResult {
+	client := ec2.New(session.Session, session.Config)
+
+	resources := []Resource{}
+	err := client.DescribeLaunchTemplateVersionsPages(&ec2.DescribeLaunchTemplateVersionsInput{LaunchTemplateId: aws.String(launchTemplateID)},
+		func(page *ec2.DescribeLaunchTemplateVersionsOutput, lastPage bool) bool {
+			for _, launchTemplateVersion := range page.LaunchTemplateVersions {
+				resource := Resource{
+					ID:        fmt.Sprintf("%s:%d", *launchTemplateVersion.LaunchTemplateId, *launchTemplateVersion.VersionNumber),
+					ARN:       "",
+					AccountID: session.AccountID,
+					Service:   "ec2",
+					Type:      "launch-template-version",
+					Region:    *session.Config.Region,
+					Metadata:  structs.Map(launchTemplateVersion),
+				}
+				resources = append(resources, resource)
+			}
+
+			return true
+		})
+	return &ReportResult{resources, err}
 }
