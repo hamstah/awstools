@@ -1,4 +1,4 @@
-package main
+package resources
 
 import (
 	"github.com/aws/aws-sdk-go/service/acm"

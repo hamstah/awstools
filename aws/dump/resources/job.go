@@ -1,7 +1,6 @@
-package main
+package resources
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/fatih/structs"
@@ -52,7 +51,7 @@ type Service struct {
 
 func (s *Service) GenerateAllJobs(account *Account) ([]Job, error) {
 	jobs := []Job{}
-	for resource, _ := range s.Reports {
+	for resource := range s.Reports {
 		newJobs, err := s.GenerateJobs(account, resource)
 		if err != nil {
 			return nil, err
@@ -65,7 +64,7 @@ func (s *Service) GenerateAllJobs(account *Account) ([]Job, error) {
 func (s *Service) GenerateJobs(account *Account, resource string) ([]Job, error) {
 	Report, ok := s.Reports[resource]
 	if !ok {
-		return nil, errors.New(fmt.Sprintf("Unknown resource %s for service %s", resource, s.Name))
+		return nil, fmt.Errorf("Unknown resource %s for service %s", resource, s.Name)
 	}
 	jobs := []Job{}
 	if s.IsGlobal {

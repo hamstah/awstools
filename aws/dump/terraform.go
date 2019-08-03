@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/hamstah/awstools/aws/dump/resources"
 	"github.com/hamstah/awstools/common"
 	"github.com/hashicorp/terraform/states"
 	"github.com/hashicorp/terraform/terraform"
@@ -167,8 +168,8 @@ func NewTerraformBackends(filename string) (*TerraformBackends, error) {
 	return result, nil
 }
 
-func LoadStateFromFile(filename string) ([]*Resource, error) {
-	output := []*Resource{}
+func LoadStateFromFile(filename string) ([]*resources.Resource, error) {
+	output := []*resources.Resource{}
 	reader, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -180,6 +181,9 @@ func LoadStateFromFile(filename string) ([]*Resource, error) {
 
 	filter := &terraform.StateFilter{State: state}
 	results, err := filter.Filter()
+	if err != nil {
+		return nil, err
+	}
 	for _, result := range results {
 		switch result.Value.(type) {
 		case *states.Resource:
@@ -197,7 +201,7 @@ func LoadStateFromFile(filename string) ([]*Resource, error) {
 
 			attr := resourceInstance.Current.AttrsFlat
 
-			additional := &Resource{
+			additional := &resources.Resource{
 				ID: attr["id"],
 			}
 

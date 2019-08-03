@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"strings"
 
+	"github.com/hamstah/awstools/aws/dump/resources"
 	"github.com/hamstah/awstools/common"
 	log "github.com/sirupsen/logrus"
 
@@ -25,22 +26,12 @@ func main() {
 	kingpin.CommandLine.Help = "Dump AWS resources"
 	common.HandleFlags()
 
-	accounts, err := NewAccounts(*accountsConfig)
+	accounts, err := resources.NewAccounts(*accountsConfig)
 	common.FatalOnError(err)
 
-	services := map[string]Service{
-		"acm":         ACMService,
-		"autoscaling": AutoScalingService,
-		"cloudwatch":  CloudwatchService,
-		"ec2":         EC2Service,
-		"iam":         IAMService,
-		"kms":         KMSService,
-		"lambda":      LambdaService,
-		"route53":     Route53Service,
-		"s3":          S3Service,
-	}
+	services := resources.AllServices()
 
-	jobs := []Job{}
+	jobs := []resources.Job{}
 
 	if len(*reports) == 0 {
 		for _, service := range services {
@@ -71,9 +62,9 @@ func main() {
 		}
 	}
 
-	resources, errors := Run(jobs)
+	result, errors := resources.Run(jobs)
 
-	report := []Resource{}
+	report := []resources.Resource{}
 	if *terraformBackendConfig != "" {
 		backends, err := NewTerraformBackends(*terraformBackendConfig)
 		common.FatalOnError(err)
@@ -84,7 +75,7 @@ func main() {
 		managed, err := backends.Load()
 		common.FatalOnError(err)
 
-		for _, resource := range resources {
+		for _, resource := range result {
 
 			s3Path, managed := managed[resource.UniqueID()]
 			if managed {
@@ -100,7 +91,7 @@ func main() {
 		}
 
 	} else {
-		report = resources
+		report = result
 	}
 
 	for _, err := range errors {
