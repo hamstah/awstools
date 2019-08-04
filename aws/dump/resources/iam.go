@@ -110,6 +110,7 @@ func IAMListRoles(session *Session) *ReportResult {
 					result.Error = err
 					return false
 				}
+				resource.ID = *role.RoleId
 				arns = append(arns, role.Arn)
 				result.Resources = append(result.Resources, *resource)
 			}
