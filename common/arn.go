@@ -56,7 +56,7 @@ func ParseARN(arn string) (*ARN, error) {
 		result.Resource = resourceParts[1]
 
 		if len(resourceParts) > 2 {
-			result.Qualifier = resourceParts[2]
+			result.Qualifier = strings.Join(resourceParts[2:], "/")
 		}
 		return result, nil
 	}
@@ -75,7 +75,7 @@ func ParseARN(arn string) (*ARN, error) {
 		return result, nil
 	}
 	result.Resource = resourceParts[1]
-	result.Qualifier = parts[6]
+	result.Qualifier = strings.Join(parts[6:], "/")
 
 	return result, nil
 }
