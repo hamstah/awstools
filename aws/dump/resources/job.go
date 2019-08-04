@@ -26,15 +26,20 @@ func (r *Resource) UniqueID() string {
 	return r.ARN
 }
 
-func NewResource(arn string, metadata interface{}) (*Resource, error) {
-	parsed, err := common.ParseARN(arn)
+func NewResource(arnstr string, metadata interface{}) (*Resource, error) {
+	parsed, err := common.ParseARN(arnstr)
 	if err != nil {
 		return nil, err
 	}
 
+	id := parsed.Resource
+	if len(parsed.Qualifier) != 0 {
+		id = fmt.Sprintf("%s/%s", id, parsed.Qualifier)
+	}
+
 	return &Resource{
-		ID:        parsed.Resource,
-		ARN:       arn,
+		ID:        id,
+		ARN:       arnstr,
 		Service:   parsed.Service,
 		Type:      parsed.ResourceType,
 		AccountID: parsed.AccountID,
