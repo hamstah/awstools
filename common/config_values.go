@@ -349,31 +349,3 @@ func secretsManagerGetSecretValue(secretsManagerClient *secretsmanager.SecretsMa
 	}
 	return res, nil
 }
-
-func FlattenMap(input map[string]interface{}) (map[string]string, error) {
-	result := map[string]string{}
-
-	for key, value := range input {
-		key = TransformKey(key)
-		switch value.(type) {
-		case int, string, float64, bool:
-			result[key] = value.(string)
-		case map[string]interface{}:
-			sub, err := FlattenMap(value.(map[string]interface{}))
-			if err != nil {
-				return nil, err
-			}
-			for subKey, subValue := range sub {
-				result[fmt.Sprintf("%s_%s", key, TransformKey(subKey))] = subValue
-			}
-		default:
-			return nil, errors.New("Unsupported type")
-		}
-	}
-
-	return result, nil
-}
-
-func TransformKey(key string) string {
-	return strings.Replace(strings.ToUpper(key), "-", "_", -1)
-}

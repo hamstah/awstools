@@ -36,7 +36,7 @@ func RefreshAndFlatten(config *common.ConfigValues, session *session.Session, aw
 		return nil, errors.Wrap(err, "failed to refresh config")
 	}
 
-	flat, err := common.FlattenMap(value)
+	flat, err := common.FlattenEnvVarMap(value)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to flatten config map, make sure it doesn't contain slices")
 	}
