@@ -11,5 +11,6 @@ func AllServices() map[string]Service {
 		"lambda":      LambdaService,
 		"route53":     Route53Service,
 		"s3":          S3Service,
-	}	
+		"rds":         RDSService,
+	}
 }
