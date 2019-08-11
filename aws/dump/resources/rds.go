@@ -1,6 +1,8 @@
 package resources
 
 import (
+	"strings"
+
 	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/fatih/structs"
 )
@@ -301,6 +303,9 @@ func RDSListOptionGroups(session *Session) *ReportResult {
 					Type:      "option-group",
 					Region:    *session.Config.Region,
 					Metadata:  structs.Map(resource),
+				}
+				if strings.HasPrefix(*resource.OptionGroupName, "default:") {
+					continue
 				}
 				resources = append(resources, r)
 			}
