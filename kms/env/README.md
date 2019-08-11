@@ -6,25 +6,31 @@ usage: kms-env [<flags>] <command>...
 Decrypt environment variables encrypted with KMS, SSM or Secret Manager.
 
 Flags:
-      --help               Show context-sensitive help (also try --help-long and --help-man).
-      --assume-role-arn=ASSUME-ROLE-ARN
-                           Role to assume
-      --assume-role-external-id=ASSUME-ROLE-EXTERNAL-ID
-                           External ID of the role to assume
-      --assume-role-session-name=ASSUME-ROLE-SESSION-NAME
-                           Role session name
-      --region=REGION      AWS Region
-      --mfa-serial-number=MFA-SERIAL-NUMBER
-                           MFA Serial Number
-      --mfa-token-code=MFA-TOKEN-CODE
-                           MFA Token Code
-  -v, --version            Display the version
-      --kms-prefix="KMS_"  Prefix for the KMS environment variables
-      --ssm-prefix="SSM_"  Prefix for the SSM environment variables
+      --help                    Show context-sensitive help (also try --help-long and --help-man).
+      --kms-prefix="KMS_"       Prefix for the KMS environment variables
+      --ssm-prefix="SSM_"       Prefix for the SSM environment variables
       --secrets-manager-prefix="SECRETS_MANAGER_"
-                           Prefix for the secrets manager environment variables
+                                Prefix for the secrets manager environment variables
       --secrets-manager-version-stage="AWSCURRENT"
-                           The version stage of secrets from secrets manager
+                                The version stage of secrets from secrets manager
+      --refresh-interval=0      Refresh interval
+      --refresh-action=RESTART  Action to take when values have changed
+      --refresh-max-retries=5   Number of retries when failing to refresh the config
+      --assume-role-arn=ASSUME-ROLE-ARN
+                                Role to assume
+      --assume-role-external-id=ASSUME-ROLE-EXTERNAL-ID
+                                External ID of the role to assume
+      --assume-role-session-name=ASSUME-ROLE-SESSION-NAME
+                                Role session name
+      --region=REGION           AWS Region
+      --mfa-serial-number=MFA-SERIAL-NUMBER
+                                MFA Serial Number
+      --mfa-token-code=MFA-TOKEN-CODE
+                                MFA Token Code
+      --session-duration=1h     Session Duration
+  -v, --version                 Display the version
+      --log-level=warn          Log level
+      --log-format=text         Log format
 
 Args:
   <command>  Command to run, prefix with -- to pass args

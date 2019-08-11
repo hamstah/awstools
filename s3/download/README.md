@@ -1,16 +1,17 @@
-# ecr-get-login
+# s3-download
 
-Get an username/password to authenticate with an ECR repository. The default output is the docker login command to use to match the same command
-in awscli. There is also an option to output the raw credentials to use in other tools.
+Download a single file from S3.
 
 ```
-usage: ecr-get-login [<flags>]
+usage: s3-download --bucket=BUCKET --key=KEY --filename=FILENAME [<flags>]
 
-Returns an authorization token from ECR.
+Download a file from S3.
 
 Flags:
       --help                 Show context-sensitive help (also try --help-long and --help-man).
-      --output=shell         Return the credentials instead of docker command
+      --bucket=BUCKET        Name of the bucket
+      --key=KEY              Key to download
+      --filename=FILENAME    Output filename
       --assume-role-arn=ASSUME-ROLE-ARN
                              Role to assume
       --assume-role-external-id=ASSUME-ROLE-EXTERNAL-ID

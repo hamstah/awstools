@@ -12,28 +12,27 @@ Sync local users with IAM
 Flags:
       --help                 Show context-sensitive help (also try --help-long and --help-man).
       --group=GROUP ...      Add users from this IAM group. You can use --group multiple times.
-      --iam-tags-prefix="iam-sync-users"  
+      --iam-tags-prefix="iam-sync-users"
                              Prefix for tags in IAM
       --lock-missing         Lock local users not in IAM.
-      --lock-ignore-user=LOCK-IGNORE-USER ...  
+      --lock-ignore-user=LOCK-IGNORE-USER ...
                              Ignore local user when locking.
       --sudo                 Add users to sudoers file.
-      --assume-role-arn=ASSUME-ROLE-ARN  
+      --assume-role-arn=ASSUME-ROLE-ARN
                              Role to assume
-      --assume-role-external-id=ASSUME-ROLE-EXTERNAL-ID  
+      --assume-role-external-id=ASSUME-ROLE-EXTERNAL-ID
                              External ID of the role to assume
-      --assume-role-session-name=ASSUME-ROLE-SESSION-NAME  
+      --assume-role-session-name=ASSUME-ROLE-SESSION-NAME
                              Role session name
       --region=REGION        AWS Region
-      --mfa-serial-number=MFA-SERIAL-NUMBER  
+      --mfa-serial-number=MFA-SERIAL-NUMBER
                              MFA Serial Number
-      --mfa-token-code=MFA-TOKEN-CODE  
+      --mfa-token-code=MFA-TOKEN-CODE
                              MFA Token Code
       --session-duration=1h  Session Duration
   -v, --version              Display the version
       --log-level=warn       Log level
       --log-format=text      Log format
-
 ```
 
 ## IAM policy

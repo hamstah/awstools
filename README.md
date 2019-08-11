@@ -19,12 +19,12 @@ Collection of tools to make working with AWS a bit easier without having to depe
 | [ecr-get-login](ecr/get-login)                                 | Prints out the command to run to auth with docker ECR. Check output flag for other options                      |
 | [ecs-dashboard](ecs/dashboard)                                 | Shows ECS services and their version across multiple AWS accounts.                                              |
 | [ecs-locate](ecs/locate)                                       | Returns `ip:port` for containers of an ECS service                                                              |
-| [ecs-deploy](ecs/dashboard)                                    | Update the container images of a task and update services to use it                                             |
+| [ecs-deploy](ecs/deploy)                                       | Update the container images of a task and update services to use it                                             |
 | [ecs-run-task](ecs/run-task)                                   | Runs a task definition                                                                                          |
 | `elb-resolve-elb-external-url`                                 | ELB classic only (no ALB). Given a name returns the zone53 record associated with the ELB, including scheme (https returned if both available) and port.|
 | `elb-resolve-alb-external-url`                                 | Both ELB classic and ALB. Given a name, returns route53 record associated with the ELB. Does not include scheme or port as it doesn't check listeners. |
 | `lambda-ping`                                                  | Pings a URL with lambda and publish a custom cloudwatch metric with the result.                                 |
-| `s3-download`                                                  | Download a single file from s3.                                                                                 |
+| [s3-download](s3/download)                                     | Download a single file from s3.                                                                                 |
 | [kms-env](kms/env/)                                            | Decrypts environment variables from SSM, KMS or Secret Manager and runs a command.                              |
 
 ## Authentication

@@ -6,20 +6,26 @@ usage: iam-session [<flags>] [<command>...]
 Start a new session under a different role.
 
 Flags:
-      --help               Show context-sensitive help (also try --help-long and --help-man).
-      --assume-role-arn=ASSUME-ROLE-ARN  
-                           Role to assume
-      --assume-role-external-id=ASSUME-ROLE-EXTERNAL-ID  
-                           External ID of the role to assume
-      --region=REGION      AWS Region
-      --mfa-serial-number=MFA-SERIAL-NUMBER  
-                           MFA Serial Number
-      --mfa-token-code=MFA-TOKEN-CODE  
-                           MFA Token Code
-  -q, --quiet              Do not output anything
-  -s, --save-profile=SAVE-PROFILE  
-                           Save the profile in the AWS credentials storage
-      --overwrite-profile  Overwrite the profile if it already exists
+      --help                 Show context-sensitive help (also try --help-long and --help-man).
+  -q, --quiet                Do not output anything
+  -s, --save-profile=SAVE-PROFILE
+                             Save the profile in the AWS credentials storage
+      --overwrite-profile    Overwrite the profile if it already exists
+      --assume-role-arn=ASSUME-ROLE-ARN
+                             Role to assume
+      --assume-role-external-id=ASSUME-ROLE-EXTERNAL-ID
+                             External ID of the role to assume
+      --assume-role-session-name=ASSUME-ROLE-SESSION-NAME
+                             Role session name
+      --region=REGION        AWS Region
+      --mfa-serial-number=MFA-SERIAL-NUMBER
+                             MFA Serial Number
+      --mfa-token-code=MFA-TOKEN-CODE
+                             MFA Token Code
+      --session-duration=1h  Session Duration
+  -v, --version              Display the version
+      --log-level=warn       Log level
+      --log-format=text      Log format
 
 Args:
   [<command>]  Command to run, prefix with -- to pass args
