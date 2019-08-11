@@ -41,7 +41,7 @@ Flags:
   ```
 * Update mutliple containers in the same task
   ```
-  $ ecs-deploy --cluster prod --task-name web --service web --image proxy=nginx:latest api=django:latest
+  $ ecs-deploy --cluster prod --task-name web --service web --image proxy=nginx:latest --image api=django:latest
   ```
 * Update the task JSON
   ```
