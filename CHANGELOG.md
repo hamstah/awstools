@@ -1,5 +1,41 @@
 # Changelog
 
+## v8.0.0 (2019-08-11)
+
+**Breaking**
+
+* `aws-dump`: Updated the id for `iam:role` to the role ID instead of name.
+* `aws-dump`: ARN resources include qualifier (update of common). Addresses collision of IDs with some role names.
+* `common`: ARN parsing include the qualifier in the resource name instead of dropping it.
+
+**New**
+
+* `aws-dump`: New reports
+  * `autoscaling:launch-configurations`
+  * `ec2:launch-configurations`
+  * `iam:instance-profiles`
+  * `rds:db-clusters`
+  * `rds:db-instance-automated-backups`
+  * `rds:db-instances`
+  * `rds:db-parameter-groups`
+  * `rds:db-security-groups`
+  * `rds:db-snapshots`
+  * `rds:db-subnet-groups`
+  * `rds:event-subscriptions`
+  * `rds:events`
+  * `rds:global-clusters`
+  * `rds:option-groups`
+  * `rds:reserved-db-instances`
+* `aws-dump`: Added `--list-reports`
+* `common`: More options to `FlattenMap`.
+* `docs`: Added more examples to ecs-deploy
+* `docs`: Added basic help for `cloudwatch-put-metric-data` and `s3-download`
+
+**Fix**
+
+* `aws-dump`: Log errors instead of silently failing.
+* `docs`: Updated most `README.md` for undocumented CLI args.
+
 ## v7.7.0 (2019-07-28)
 
 **New**
