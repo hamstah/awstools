@@ -18,7 +18,7 @@ var (
 	taskName = kingpin.Flag("task-name", "ECS task name").String()
 	cluster  = kingpin.Flag("cluster", "ECS cluster").Required().String()
 	services = kingpin.Flag("service", "ECS services").Required().Strings()
-	images   = kingpin.Flag("image", "Change the images to the new ones. Container name=image").StringMap()
+	images   = kingpin.Flag("image", "Change the images to the new ones. Format is container_name=image. Can be repeated.").StringMap()
 	timeout  = kingpin.Flag("timeout", "Timeout when waiting for services to update").Default("300s").Duration()
 	taskJSON = kingpin.Flag("task-json", "Path to a JSON file with the task definition to use").String()
 )
