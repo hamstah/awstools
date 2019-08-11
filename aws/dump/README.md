@@ -8,51 +8,72 @@ usage: aws-dump --accounts-config=ACCOUNTS-CONFIG --output=OUTPUT [<flags>]
 Dump AWS resources
 
 Flags:
-      --help            Show context-sensitive help (also try --help-long and --help-man).
-      --assume-role-arn=ASSUME-ROLE-ARN
-                        Role to assume
-      --assume-role-external-id=ASSUME-ROLE-EXTERNAL-ID
-                        External ID of the role to assume
-      --assume-role-session-name=ASSUME-ROLE-SESSION-NAME
-                        Role session name
-      --region=REGION   AWS Region
-      --mfa-serial-number=MFA-SERIAL-NUMBER
-                        MFA Serial Number
-      --mfa-token-code=MFA-TOKEN-CODE
-                        MFA Token Code
-  -v, --version         Display the version
+      --help                 Show context-sensitive help (also try --help-long and --help-man).
   -c, --accounts-config=ACCOUNTS-CONFIG
-                        Configuration file with the accounts to list resources for.
+                             Configuration file with the accounts to list resources for.
   -t, --terraform-backends-config=TERRAFORM-BACKENDS-CONFIG
-                        Configuration file with the terraform backends to compare with.
-  -o, --output=OUTPUT   Filename to store the results in.
-      --only-unmanaged  Only return resources not managed by terraform.
+                             Configuration file with the terraform backends to compare with.
+  -o, --output=OUTPUT        Filename to store the results in.
+      --only-unmanaged       Only return resources not managed by terraform.
+      --report=REPORT ...    Only run the specified report. Can be repeated.
+      --list-reports         Prints the list of available reports and exits.
+      --assume-role-arn=ASSUME-ROLE-ARN
+                             Role to assume
+      --assume-role-external-id=ASSUME-ROLE-EXTERNAL-ID
+                             External ID of the role to assume
+      --assume-role-session-name=ASSUME-ROLE-SESSION-NAME
+                             Role session name
+      --region=REGION        AWS Region
+      --mfa-serial-number=MFA-SERIAL-NUMBER
+                             MFA Serial Number
+      --mfa-token-code=MFA-TOKEN-CODE
+                             MFA Token Code
+      --session-duration=1h  Session Duration
+  -v, --version              Display the version
+      --log-level=warn       Log level
+      --log-format=text      Log format
 ```
 
 ## Supported resources
 
-* CloudWatch
-  * Alarms
-* EC2
-  * VPC
-  * Security Groups
-  * NAT gateways
-* IAM (Does not include attachments)
-  * Users
-  * Access keys
-  * Roles
-  * Policies
-* KMS
-  * Keys (Ignores deleted and AWS managed keys)
-  * Aliases (Ignores aliases for AWS managed keys)
-* Lambda
-  * Functions
-  * Event Source Mappings
-* Route53
-  * HostedZones
-  * RecordSets
-* S3
-  * Buckets
+You can see available reports with `--list-reports`.
+
+```
+acm:certificates
+autoscaling:groups
+autoscaling:launch-configurations
+cloudwatch:alarms
+ec2:images
+ec2:instances
+ec2:key-pairs
+ec2:launch-templates
+ec2:nat-gateways
+ec2:security-groups
+ec2:vpcs
+iam:groups
+iam:instance-profiles
+iam:policies
+iam:roles
+iam:users-and-access-keys
+kms:aliases
+kms:keys
+lambda:event-source-mappings
+lambda:functions
+rds:db-clusters
+rds:db-instance-automated-backups
+rds:db-instances
+rds:db-parameter-groups
+rds:db-security-groups
+rds:db-snapshots
+rds:db-subnet-groups
+rds:event-subscriptions
+rds:events
+rds:global-clusters
+rds:option-groups
+rds:reserved-db-instances
+route53:zones-and-records
+s3:buckets
+```
 
 ## Configuration
 

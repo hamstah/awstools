@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/hamstah/awstools/aws/dump/resources"
@@ -19,12 +20,20 @@ var (
 	output                 = kingpin.Flag("output", "Filename to store the results in.").Short('o').Required().String()
 	onlyUnmanaged          = kingpin.Flag("only-unmanaged", "Only return resources not managed by terraform.").Default("false").Bool()
 	reports                = kingpin.Flag("report", "Only run the specified report. Can be repeated.").Strings()
+	listReports            = kingpin.Flag("list-reports", "Prints the list of available reports and exits.").Default("false").Bool()
 )
 
 func main() {
 	kingpin.CommandLine.Name = "aws-dump"
 	kingpin.CommandLine.Help = "Dump AWS resources"
 	common.HandleFlags()
+
+	if *listReports {
+		for _, report := range resources.AllReports() {
+			fmt.Println(report)
+		}
+		os.Exit(0)
+	}
 
 	accounts, err := resources.NewAccounts(*accountsConfig)
 	common.FatalOnError(err)
