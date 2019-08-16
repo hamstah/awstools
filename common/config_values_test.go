@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
-	"github.com/hamstah/awstools/common"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -29,7 +28,7 @@ func setup() {
 		Profile:           "hamstah",
 		SharedConfigState: session.SharedConfigEnable,
 	}))
-	conf = common.NewConfig("eu-west-1")
+	conf = NewConfig("eu-west-1")
 }
 
 type Data struct {
