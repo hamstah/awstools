@@ -33,6 +33,45 @@ Flags:
       --log-format=text      Log format
 ```
 
+# Required IAM permissions
+
+The minimum required permissions are
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecs:DescribeServices",
+        "ecs:RegisterTaskDefinition"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "ecs:UpdateService",
+      "Resource": "arn:aws:ecs:<region>:<account-id>:service/<cluster-name>/<service-name>"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ecs:DescribeTaskDefinition"
+      ],
+      "Resource": "arn:aws:ecs:<region>:<account-id>:task-definition/<task-family>"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "arn:aws:iam::<account-id>:role/<task-role-name>"
+    }
+  ]
+}
+```
+
+If your task definition does not use `taskRoleArn` key you can remove the last statement.
+
 # Examples
 
 * Update a container image in a task
