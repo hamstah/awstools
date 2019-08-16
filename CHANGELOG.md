@@ -1,5 +1,18 @@
 # Changelog
 
+
+## v8.1.0 (2019-08-17)
+
+**New**
+
+* All tools supporting `--assume-role-arn` can now be given a policy to assume with the role with `--assume-role-policy`.
+* `docs`: Added more details on IAM policies for some tools.
+
+**Fix**
+
+* `aws-dump`: Filter out default RDS option groups.
+
+
 ## v8.0.0 (2019-08-11)
 
 **Breaking**

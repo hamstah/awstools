@@ -33,6 +33,7 @@ Every tool supports the standard AWS authentication as well as sts sessions with
 
 * `--region`: Choose the aws-region to use
 * `--assume-role-arn`: Assume the role before running. This is useful for cross account access.
+* `--assume-role-policy`: Policy to use when assuming the role, can be used to drop permissions from the role.
 * `--mfa-serial-number`: The new session will have its 2FA flag set.
 * `--mfa-token-code`: The token code to use when using `--mfa-serial-number`. If not provided the tool will prompt for it.
 * `--session-duration`: The length of the session, for example `--session-duration=1h`
