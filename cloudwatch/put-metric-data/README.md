@@ -30,3 +30,23 @@ Flags:
       --log-format=text          Log format
 
 ```
+
+
+# Required IAM permissions
+
+The minimum required permissions are
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:PutMetricData"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```

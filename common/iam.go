@@ -1,8 +1,8 @@
 package common
 
 import (
-	"errors"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 	"time"
@@ -12,6 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/pkg/errors"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
@@ -19,6 +20,7 @@ type SessionFlags struct {
 	RoleArn         *string
 	RoleExternalID  *string
 	RoleSessionName *string
+	RolePolicy      *string
 	Region          *string
 	MFASerialNumber *string
 	MFATokenCode    *string
@@ -30,6 +32,7 @@ func KingpinSessionFlags() *SessionFlags {
 		RoleArn:         kingpin.Flag("assume-role-arn", "Role to assume").String(),
 		RoleExternalID:  kingpin.Flag("assume-role-external-id", "External ID of the role to assume").String(),
 		RoleSessionName: kingpin.Flag("assume-role-session-name", "Role session name").String(),
+		RolePolicy:      kingpin.Flag("assume-role-policy", "IAM policy to use when assuming the role").String(),
 		Region:          kingpin.Flag("region", "AWS Region").String(),
 		MFASerialNumber: kingpin.Flag("mfa-serial-number", "MFA Serial Number").String(),
 		MFATokenCode:    kingpin.Flag("mfa-token-code", "MFA Token Code").String(),
@@ -130,6 +133,18 @@ func AssumeRoleConfig(sessionFlags *SessionFlags, sess *session.Session) *aws.Co
 
 			if sessionFlags.Duration != nil {
 				p.Duration = *sessionFlags.Duration
+			}
+
+			if *sessionFlags.RolePolicy != "" {
+				policyBytes, err := ioutil.ReadFile(*sessionFlags.RolePolicy)
+				if err != nil {
+					if !os.IsNotExist(err) {
+						panic(errors.Wrap(err, "failed to load role policy"))
+					}
+					p.Policy = sessionFlags.RolePolicy
+				} else {
+					p.Policy = aws.String(string(policyBytes))
+				}
 			}
 
 			if *sessionFlags.MFASerialNumber != "" {
