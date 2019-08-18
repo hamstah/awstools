@@ -136,14 +136,14 @@ func AssumeRoleConfig(sessionFlags *SessionFlags, sess *session.Session) *aws.Co
 			}
 
 			if *sessionFlags.RolePolicy != "" {
-				policyBytes, err := ioutil.ReadFile(*sessionFlags.RolePolicy)
-				if err != nil {
-					if !os.IsNotExist(err) {
+				if (*sessionFlags.RolePolicy)[0] != '{' {
+					policyBytes, err := ioutil.ReadFile(*sessionFlags.RolePolicy)
+					if err != nil {
 						panic(errors.Wrap(err, "failed to load role policy"))
 					}
-					p.Policy = sessionFlags.RolePolicy
-				} else {
 					p.Policy = aws.String(string(policyBytes))
+				} else {
+					p.Policy = sessionFlags.RolePolicy
 				}
 			}
 
