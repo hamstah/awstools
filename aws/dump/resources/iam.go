@@ -1,6 +1,9 @@
 package resources
 
 import (
+	"encoding/json"
+	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -132,6 +135,59 @@ func IAMListRoles(session *Session) *ReportResult {
 	return result
 }
 
+func IAMListPolicyVersions(session *Session, policyArn string) *ReportResult {
+	client := iam.New(session.Session, session.Config)
+
+	result := &ReportResult{}
+	err := client.ListPolicyVersionsPages(&iam.ListPolicyVersionsInput{PolicyArn: aws.String(policyArn)},
+		func(page *iam.ListPolicyVersionsOutput, lastPage bool) bool {
+			for _, resource := range page.Versions {
+
+				policyVersion, err := client.GetPolicyVersion(&iam.GetPolicyVersionInput{PolicyArn: aws.String(policyArn), VersionId: resource.VersionId})
+				if err != nil {
+					result.Error = err
+					return false
+				}
+
+				decodedDocument, err := url.QueryUnescape(*policyVersion.PolicyVersion.Document)
+				if err != nil {
+					result.Error = err
+					return false
+				}
+
+				document := map[string]interface{}{}
+				err = json.Unmarshal([]byte(decodedDocument), &document)
+				if err != nil {
+					result.Error = err
+					return false
+				}
+
+				metadata := structs.Map(policyVersion.PolicyVersion)
+				metadata["Document"] = document
+
+				arn := fmt.Sprintf("%s:%s", policyArn, *resource.VersionId)
+				r := Resource{
+					ID:        arn,
+					ARN:       arn,
+					AccountID: session.AccountID,
+					Service:   "iam",
+					Type:      "policy-version",
+					Region:    *session.Config.Region,
+					Metadata:  metadata,
+				}
+				result.Resources = append(result.Resources, r)
+			}
+			return true
+		})
+
+	if result.Error != nil {
+		return result
+	}
+
+	result.Error = err
+	return result
+}
+
 func IAMListPolicies(session *Session) *ReportResult {
 	client := iam.New(session.Session, session.Config)
 	arns := []*string{}
@@ -146,7 +202,15 @@ func IAMListPolicies(session *Session) *ReportResult {
 				}
 
 				arns = append(arns, policy.Arn)
+
+				policyVersions := IAMListPolicyVersions(session, *policy.Arn)
+				if policyVersions.Error != nil {
+					result.Error = policyVersions.Error
+					return false
+				}
+
 				result.Resources = append(result.Resources, *resource)
+				result.Resources = append(result.Resources, policyVersions.Resources...)
 			}
 
 			return true
