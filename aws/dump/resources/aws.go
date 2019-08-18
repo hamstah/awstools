@@ -13,6 +13,7 @@ import (
 type Account struct {
 	Regions     []string `json:"regions"`
 	RoleARN     string   `json:"role_arn"`
+	RolePolicy  string   `json:"role_policy"`
 	ExternalID  string   `json:"external_id"`
 	SessionName string   `json:"session_name"`
 	Sessions    []*Session
@@ -47,6 +48,7 @@ func NewAccounts(filename string) (*Accounts, error) {
 			sess, conf := common.OpenSession(&common.SessionFlags{
 				RoleArn:         &account.RoleARN,
 				RoleExternalID:  &account.ExternalID,
+				RolePolicy:      &account.RolePolicy,
 				Region:          &region,
 				RoleSessionName: &account.SessionName,
 
