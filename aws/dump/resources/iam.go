@@ -1,9 +1,7 @@
 package resources
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/url"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -135,9 +133,7 @@ func IAMListRoles(session *Session) *ReportResult {
 	return result
 }
 
-func IAMListPolicyVersions(session *Session, policyArn string) *ReportResult {
-	client := iam.New(session.Session, session.Config)
-
+func IAMListPolicyVersions(session *Session, client *iam.IAM, policyArn string) *ReportResult {
 	result := &ReportResult{}
 	err := client.ListPolicyVersionsPages(&iam.ListPolicyVersionsInput{PolicyArn: aws.String(policyArn)},
 		func(page *iam.ListPolicyVersionsOutput, lastPage bool) bool {
@@ -149,14 +145,7 @@ func IAMListPolicyVersions(session *Session, policyArn string) *ReportResult {
 					return false
 				}
 
-				decodedDocument, err := url.QueryUnescape(*policyVersion.PolicyVersion.Document)
-				if err != nil {
-					result.Error = err
-					return false
-				}
-
-				document := map[string]interface{}{}
-				err = json.Unmarshal([]byte(decodedDocument), &document)
+				document, err := DecodeInlinePolicyDocument(*policyVersion.PolicyVersion.Document)
 				if err != nil {
 					result.Error = err
 					return false
@@ -203,7 +192,7 @@ func IAMListPolicies(session *Session) *ReportResult {
 
 				arns = append(arns, policy.Arn)
 
-				policyVersions := IAMListPolicyVersions(session, *policy.Arn)
+				policyVersions := IAMListPolicyVersions(session, client, *policy.Arn)
 				if policyVersions.Error != nil {
 					result.Error = policyVersions.Error
 					return false
