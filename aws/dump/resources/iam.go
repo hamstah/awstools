@@ -39,7 +39,7 @@ func IAMListUsersAndAccessKeys(session *Session) *ReportResult {
 				arns = append(arns, user.Arn)
 				result.Resources = append(result.Resources, *resource)
 
-				keysResult := IAMListAccessKeys(session, *user.UserName)
+				keysResult := IAMListAccessKeys(session, client, *user.UserName)
 				if keysResult.Error != nil {
 					result.Error = keysResult.Error
 					return false
@@ -218,9 +218,7 @@ func IAMListPolicies(session *Session) *ReportResult {
 	return result
 }
 
-func IAMListAccessKeys(session *Session, username string) *ReportResult {
-	client := iam.New(session.Session, session.Config)
-
+func IAMListAccessKeys(session *Session, client *iam.IAM, username string) *ReportResult {
 	result := &ReportResult{}
 	result.Error = client.ListAccessKeysPages(&iam.ListAccessKeysInput{
 		UserName: aws.String(username),
