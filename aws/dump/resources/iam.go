@@ -111,6 +111,14 @@ func IAMListRoles(session *Session) *ReportResult {
 					result.Error = err
 					return false
 				}
+
+				document, err := DecodeInlinePolicyDocument(*resource.Metadata["AssumeRolePolicyDocument"].(*string))
+				if err != nil {
+					result.Error = err
+					return false
+				}
+				resource.Metadata["AssumeRolePolicyDocument"] = document
+
 				resource.ID = *role.RoleId
 				arns = append(arns, role.Arn)
 				result.Resources = append(result.Resources, *resource)
@@ -297,7 +305,7 @@ func IAMListInstanceProfiles(session *Session) *ReportResult {
 
 	client := iam.New(session.Session, session.Config)
 
-	resources := []Resource{}
+	result := &ReportResult{}
 	err := client.ListInstanceProfilesPages(&iam.ListInstanceProfilesInput{},
 		func(page *iam.ListInstanceProfilesOutput, lastPage bool) bool {
 			for _, instanceProfile := range page.InstanceProfiles {
@@ -310,11 +318,27 @@ func IAMListInstanceProfiles(session *Session) *ReportResult {
 					Region:    *session.Config.Region,
 					Metadata:  structs.Map(instanceProfile),
 				}
-				resources = append(resources, resource)
+
+				roles := resource.Metadata["Roles"].([]interface{})
+				for _, irole := range roles {
+					role := irole.(map[string]interface{})
+					document, err := DecodeInlinePolicyDocument(*role["AssumeRolePolicyDocument"].(*string))
+					if err != nil {
+						result.Error = err
+						return false
+					}
+					role["AssumeRolePolicyDocument"] = document
+				}
+
+				result.Resources = append(result.Resources, resource)
 			}
 
 			return true
 		})
 
-	return &ReportResult{resources, err}
+	if result.Error != nil {
+		return result
+	}
+	result.Error = err
+	return result
 }
