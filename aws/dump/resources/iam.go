@@ -23,7 +23,70 @@ var (
 	}
 )
 
+type PolicyFetchFunc func(*Session, *iam.IAM, string, string) *ReportResult
+
+func IAMListUserAttachedPolicies(session *Session, client *iam.IAM, userARN, userName string) *ReportResult {
+	result := &ReportResult{}
+	err := client.ListAttachedUserPoliciesPages(&iam.ListAttachedUserPoliciesInput{UserName: aws.String(userName)},
+		func(page *iam.ListAttachedUserPoliciesOutput, lastPage bool) bool {
+			for _, policy := range page.AttachedPolicies {
+				r := Resource{
+					ID:        fmt.Sprintf("%s_%s", userName, *policy.PolicyName),
+					ARN:       "",
+					AccountID: session.AccountID,
+					Service:   "iam",
+					Type:      "user-policy-attachment",
+					Region:    *session.Config.Region,
+					Metadata:  structs.Map(policy),
+				}
+				r.Metadata["UserArn"] = userARN
+				result.Resources = append(result.Resources, r)
+			}
+			return true
+		})
+	result.Error = err
+	return result
+}
+
+func IAMListUserPolicies(session *Session, client *iam.IAM, userARN, userName string) *ReportResult {
+	result := &ReportResult{}
+	err := client.ListUserPoliciesPages(&iam.ListUserPoliciesInput{UserName: aws.String(userName)},
+		func(page *iam.ListUserPoliciesOutput, lastPage bool) bool {
+			for _, policyName := range page.PolicyNames {
+
+				policy, err := client.GetUserPolicy(&iam.GetUserPolicyInput{UserName: aws.String(userName), PolicyName: policyName})
+				if err != nil {
+					result.Error = err
+					return false
+				}
+
+				r := Resource{
+					ID:        fmt.Sprintf("%s_%s_inline", userName, *policy.PolicyName),
+					ARN:       "",
+					AccountID: session.AccountID,
+					Service:   "iam",
+					Type:      "user-policy-inline",
+					Region:    *session.Config.Region,
+					Metadata:  structs.Map(policy),
+				}
+				document, err := DecodeInlinePolicyDocument(*r.Metadata["PolicyDocument"].(*string))
+				if err != nil {
+					result.Error = err
+					return false
+				}
+				r.Metadata["PolicyDocument"] = document
+				result.Resources = append(result.Resources, r)
+			}
+			return true
+		})
+	result.Error = err
+	return result
+}
+
 func IAMListUsersAndAccessKeys(session *Session) *ReportResult {
+
+	policiesFunctions := []PolicyFetchFunc{IAMListUserPolicies, IAMListUserAttachedPolicies}
+
 	client := iam.New(session.Session, session.Config)
 	accessKeys := []Resource{}
 	arns := []*string{}
@@ -38,6 +101,15 @@ func IAMListUsersAndAccessKeys(session *Session) *ReportResult {
 				}
 				arns = append(arns, user.Arn)
 				result.Resources = append(result.Resources, *resource)
+
+				for _, fn := range policiesFunctions {
+					policies := fn(session, client, *user.Arn, *user.UserName)
+					if policies.Error != nil {
+						result.Error = policies.Error
+						return false
+					}
+					result.Resources = append(result.Resources, policies.Resources...)
+				}
 
 				keysResult := IAMListAccessKeys(session, client, *user.UserName)
 				if keysResult.Error != nil {
@@ -65,7 +137,68 @@ func IAMListUsersAndAccessKeys(session *Session) *ReportResult {
 	return result
 }
 
+func IAMListGroupAttachedPolicies(session *Session, client *iam.IAM, groupARN, groupName string) *ReportResult {
+	result := &ReportResult{}
+	err := client.ListAttachedGroupPoliciesPages(&iam.ListAttachedGroupPoliciesInput{GroupName: aws.String(groupName)},
+		func(page *iam.ListAttachedGroupPoliciesOutput, lastPage bool) bool {
+			for _, policy := range page.AttachedPolicies {
+				r := Resource{
+					ID:        fmt.Sprintf("%s_%s", groupName, *policy.PolicyName),
+					ARN:       "",
+					AccountID: session.AccountID,
+					Service:   "iam",
+					Type:      "group-policy-attachment",
+					Region:    *session.Config.Region,
+					Metadata:  structs.Map(policy),
+				}
+				r.Metadata["GroupArn"] = groupARN
+				result.Resources = append(result.Resources, r)
+			}
+			return true
+		})
+	result.Error = err
+	return result
+}
+
+func IAMListGroupPolicies(session *Session, client *iam.IAM, groupARN, groupName string) *ReportResult {
+	result := &ReportResult{}
+	err := client.ListGroupPoliciesPages(&iam.ListGroupPoliciesInput{GroupName: aws.String(groupName)},
+		func(page *iam.ListGroupPoliciesOutput, lastPage bool) bool {
+			for _, policyName := range page.PolicyNames {
+
+				policy, err := client.GetGroupPolicy(&iam.GetGroupPolicyInput{GroupName: aws.String(groupName), PolicyName: policyName})
+				if err != nil {
+					result.Error = err
+					return false
+				}
+
+				r := Resource{
+					ID:        fmt.Sprintf("%s_%s_inline", groupName, *policy.PolicyName),
+					ARN:       "",
+					AccountID: session.AccountID,
+					Service:   "iam",
+					Type:      "group-policy-inline",
+					Region:    *session.Config.Region,
+					Metadata:  structs.Map(policy),
+				}
+				document, err := DecodeInlinePolicyDocument(*r.Metadata["PolicyDocument"].(*string))
+				if err != nil {
+					result.Error = err
+					return false
+				}
+				r.Metadata["PolicyDocument"] = document
+				result.Resources = append(result.Resources, r)
+			}
+			return true
+		})
+	result.Error = err
+	return result
+}
+
 func IAMListGroups(session *Session) *ReportResult {
+
+	policiesFunctions := []PolicyFetchFunc{IAMListGroupPolicies, IAMListGroupAttachedPolicies}
+
 	client := iam.New(session.Session, session.Config)
 	arns := []*string{}
 	result := &ReportResult{}
@@ -80,6 +213,15 @@ func IAMListGroups(session *Session) *ReportResult {
 				}
 				arns = append(arns, group.Arn)
 				result.Resources = append(result.Resources, *resource)
+
+				for _, fn := range policiesFunctions {
+					policies := fn(session, client, *group.Arn, *group.GroupName)
+					if policies.Error != nil {
+						result.Error = policies.Error
+						return false
+					}
+					result.Resources = append(result.Resources, policies.Resources...)
+				}
 			}
 
 			return true
@@ -99,7 +241,68 @@ func IAMListGroups(session *Session) *ReportResult {
 	return result
 }
 
+func IAMListRoleAttachedPolicies(session *Session, client *iam.IAM, roleARN, roleName string) *ReportResult {
+	result := &ReportResult{}
+	err := client.ListAttachedRolePoliciesPages(&iam.ListAttachedRolePoliciesInput{RoleName: aws.String(roleName)},
+		func(page *iam.ListAttachedRolePoliciesOutput, lastPage bool) bool {
+			for _, policy := range page.AttachedPolicies {
+				r := Resource{
+					ID:        fmt.Sprintf("%s_%s", roleName, *policy.PolicyName),
+					ARN:       "",
+					AccountID: session.AccountID,
+					Service:   "iam",
+					Type:      "role-policy-attachment",
+					Region:    *session.Config.Region,
+					Metadata:  structs.Map(policy),
+				}
+				r.Metadata["RoleArn"] = roleARN
+				result.Resources = append(result.Resources, r)
+			}
+			return true
+		})
+	result.Error = err
+	return result
+}
+
+func IAMListRolePolicies(session *Session, client *iam.IAM, roleARN, roleName string) *ReportResult {
+	result := &ReportResult{}
+	err := client.ListRolePoliciesPages(&iam.ListRolePoliciesInput{RoleName: aws.String(roleName)},
+		func(page *iam.ListRolePoliciesOutput, lastPage bool) bool {
+			for _, policyName := range page.PolicyNames {
+
+				policy, err := client.GetRolePolicy(&iam.GetRolePolicyInput{RoleName: aws.String(roleName), PolicyName: policyName})
+				if err != nil {
+					result.Error = err
+					return false
+				}
+
+				r := Resource{
+					ID:        fmt.Sprintf("%s_%s_inline", roleName, *policy.PolicyName),
+					ARN:       "",
+					AccountID: session.AccountID,
+					Service:   "iam",
+					Type:      "role-policy-inline",
+					Region:    *session.Config.Region,
+					Metadata:  structs.Map(policy),
+				}
+				document, err := DecodeInlinePolicyDocument(*r.Metadata["PolicyDocument"].(*string))
+				if err != nil {
+					result.Error = err
+					return false
+				}
+				r.Metadata["PolicyDocument"] = document
+				result.Resources = append(result.Resources, r)
+			}
+			return true
+		})
+	result.Error = err
+	return result
+}
+
 func IAMListRoles(session *Session) *ReportResult {
+
+	policiesFunctions := []PolicyFetchFunc{IAMListRolePolicies, IAMListRoleAttachedPolicies}
+
 	client := iam.New(session.Session, session.Config)
 	arns := []*string{}
 	result := &ReportResult{}
@@ -122,6 +325,22 @@ func IAMListRoles(session *Session) *ReportResult {
 				resource.ID = *role.RoleId
 				arns = append(arns, role.Arn)
 				result.Resources = append(result.Resources, *resource)
+
+				policies := IAMListRolePolicies(session, client, *role.Arn, *role.RoleName)
+				if policies.Error != nil {
+					result.Error = policies.Error
+					return false
+				}
+				result.Resources = append(result.Resources, policies.Resources...)
+
+				for _, fn := range policiesFunctions {
+					policies := fn(session, client, *role.Arn, *role.RoleName)
+					if policies.Error != nil {
+						result.Error = policies.Error
+						return false
+					}
+					result.Resources = append(result.Resources, policies.Resources...)
+				}
 			}
 
 			return true
