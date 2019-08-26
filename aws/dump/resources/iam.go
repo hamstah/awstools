@@ -75,6 +75,7 @@ func IAMListUserPolicies(session *Session, client *iam.IAM, userARN, userName st
 					return false
 				}
 				r.Metadata["PolicyDocument"] = document
+				r.Metadata["UserArn"] = userARN
 				result.Resources = append(result.Resources, r)
 			}
 			return true
@@ -187,6 +188,7 @@ func IAMListGroupPolicies(session *Session, client *iam.IAM, groupARN, groupName
 					return false
 				}
 				r.Metadata["PolicyDocument"] = document
+				r.Metadata["GroupArn"] = groupARN
 				result.Resources = append(result.Resources, r)
 			}
 			return true
@@ -291,6 +293,7 @@ func IAMListRolePolicies(session *Session, client *iam.IAM, roleARN, roleName st
 					return false
 				}
 				r.Metadata["PolicyDocument"] = document
+				r.Metadata["RoleArn"] = roleARN
 				result.Resources = append(result.Resources, r)
 			}
 			return true
