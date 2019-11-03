@@ -19,25 +19,62 @@ var (
 func S3ListBuckets(session *Session) *ReportResult {
 	client := s3.New(session.Session, session.Config)
 
-	buckets := []Resource{}
-
+	result := &ReportResult{[]Resource{}, nil}
 	res, err := client.ListBuckets(&s3.ListBucketsInput{})
 	if err != nil {
 		return &ReportResult{nil, err}
 	}
 
 	for _, bucket := range res.Buckets {
-		buckets = append(buckets, Resource{
+
+		location, err := client.GetBucketLocation(&s3.GetBucketLocationInput{
+			Bucket: bucket.Name,
+		})
+
+		if err != nil {
+			result.Error = err
+			return result
+		}
+
+		if *location.LocationConstraint != *session.Config.Region {
+			continue
+		}
+
+		result.Resources = append(result.Resources, Resource{
 			ID:        *bucket.Name,
 			ARN:       fmt.Sprintf("arn:aws:s3:::%s", *bucket.Name),
 			AccountID: session.AccountID,
 			Service:   "s3",
 			Type:      "bucket",
-			// AccountID
-			// Region: Need to use GetBucketLocation
-			Metadata: structs.Map(bucket),
+			Region:    *location.LocationConstraint,
+			Metadata:  structs.Map(bucket),
 		})
+
+		policy, err := client.GetBucketPolicy(&s3.GetBucketPolicyInput{
+			Bucket: bucket.Name,
+		})
+		if err != nil {
+			result.Error = err
+			return result
+		}
+
+		document, err := DecodeInlinePolicyDocument(*policy.Policy)
+		if err != nil {
+			result.Error = err
+			return result
+		}
+
+		result.Resources = append(result.Resources, Resource{
+			ID:        *bucket.Name,
+			AccountID: session.AccountID,
+			Service:   "s3",
+			Type:      "bucket-policy",
+			Metadata: map[string]interface{}{
+				"PolicyDocument": document,
+			},
+		})
+
 	}
 
-	return &ReportResult{buckets, err}
+	return result
 }
