@@ -14,11 +14,12 @@ var (
 		Name:     "iam",
 		IsGlobal: true,
 		Reports: map[string]Report{
-			"users-and-access-keys": IAMListUsersAndAccessKeys,
-			"roles":                 IAMListRoles,
-			"policies":              IAMListPolicies,
-			"groups":                IAMListGroups,
-			"instance-profiles":     IAMListInstanceProfiles,
+			"users-and-access-keys":         IAMListUsersAndAccessKeys,
+			"roles":                         IAMListRoles,
+			"policies":                      IAMListPolicies,
+			"groups":                        IAMListGroups,
+			"instance-profiles":             IAMListInstanceProfiles,
+			"account-authorization-details": IAMListAccountAuthorizationDetails,
 		},
 	}
 )
@@ -240,6 +241,126 @@ func IAMListGroups(session *Session) *ReportResult {
 	}
 	AttachServiceLastAccessedDetails(client, result, jobIds)
 
+	return result
+}
+
+func IAMListAccountAuthorizationDetails(session *Session) *ReportResult {
+	client := iam.New(session.Session, session.Config)
+
+	result := &ReportResult{}
+
+	err := client.GetAccountAuthorizationDetailsPages(&iam.GetAccountAuthorizationDetailsInput{},
+		func(page *iam.GetAccountAuthorizationDetailsOutput, lastPage bool) bool {
+
+			for _, group := range page.GroupDetailList {
+				resource := Resource{
+					ID:        *group.GroupId,
+					ARN:       *group.Arn,
+					AccountID: session.AccountID,
+					Service:   "iam",
+					Type:      "account-authorization-details-group",
+					Metadata:  structs.Map(group),
+				}
+
+				for _, policyI := range resource.Metadata["GroupPolicyList"].([]interface{}) {
+					policy := policyI.(map[string]interface{})
+
+					document, err := DecodeInlinePolicyDocument(*policy["PolicyDocument"].(*string))
+					if err != nil {
+						result.Error = err
+						return false
+					}
+					policy["PolicyDocument"] = document
+				}
+
+				result.Resources = append(result.Resources, resource)
+			}
+
+			for _, user := range page.UserDetailList {
+				resource := Resource{
+					ID:        *user.UserId,
+					ARN:       *user.Arn,
+					AccountID: session.AccountID,
+					Service:   "iam",
+					Type:      "account-authorization-details-user",
+					Metadata:  structs.Map(user),
+				}
+
+				for _, policyI := range resource.Metadata["UserPolicyList"].([]interface{}) {
+					policy := policyI.(map[string]interface{})
+
+					document, err := DecodeInlinePolicyDocument(*policy["PolicyDocument"].(*string))
+					if err != nil {
+						result.Error = err
+						return false
+					}
+					policy["PolicyDocument"] = document
+				}
+
+				result.Resources = append(result.Resources, resource)
+			}
+
+			for _, role := range page.RoleDetailList {
+				resource := Resource{
+					ID:        *role.RoleId,
+					ARN:       *role.Arn,
+					AccountID: session.AccountID,
+					Service:   "iam",
+					Type:      "account-authorization-details-role",
+					Metadata:  structs.Map(role),
+				}
+
+				document, err := DecodeInlinePolicyDocument(*resource.Metadata["AssumeRolePolicyDocument"].(*string))
+				if err != nil {
+					result.Error = err
+					return false
+				}
+				resource.Metadata["AssumeRolePolicyDocument"] = document
+
+				for _, instanceProfileI := range resource.Metadata["InstanceProfileList"].([]interface{}) {
+					instanceProfile := instanceProfileI.(map[string]interface{})
+					for _, roleI := range instanceProfile["Roles"].([]interface{}) {
+						role := roleI.(map[string]interface{})
+						document, err := DecodeInlinePolicyDocument(*role["AssumeRolePolicyDocument"].(*string))
+						if err != nil {
+							result.Error = err
+							return false
+						}
+						role["AssumeRolePolicyDocument"] = document
+					}
+				}
+
+				result.Resources = append(result.Resources, resource)
+			}
+
+			for _, policy := range page.Policies {
+				resource := Resource{
+					ID:        *policy.PolicyId,
+					ARN:       *policy.Arn,
+					AccountID: session.AccountID,
+					Service:   "iam",
+					Type:      "account-authorization-details-policy",
+					Metadata:  structs.Map(policy),
+				}
+
+				for _, policyI := range resource.Metadata["PolicyVersionList"].([]interface{}) {
+					policy := policyI.(map[string]interface{})
+
+					document, err := DecodeInlinePolicyDocument(*policy["Document"].(*string))
+					if err != nil {
+						result.Error = err
+						return false
+					}
+					policy["Document"] = document
+				}
+
+				result.Resources = append(result.Resources, resource)
+			}
+
+			return true
+		})
+
+	result.Error = err
 	return result
 }
 
@@ -519,7 +640,7 @@ func AttachServiceLastAccessedDetails(client *iam.IAM, result *ReportResult, job
 			result.Resources[i].Metadata["LastUsed"] = lastUsedAt
 
 		}
-		i += 1
+		i++
 	}
 }
 
