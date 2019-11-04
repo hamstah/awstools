@@ -14,8 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/hamstah/awstools/aws/dump/resources"
 	"github.com/hamstah/awstools/common"
-	"github.com/hashicorp/terraform/states"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform/states/statefile"
 )
 
 type Substitution struct {
@@ -44,6 +43,7 @@ func (s3Backend *S3Backend) Download(destination string, options *Options) (map[
 		Region:          &s3Backend.Region,
 		RoleSessionName: &s3Backend.SessionName,
 
+		RolePolicy:      aws.String(""),
 		MFASerialNumber: aws.String(""),
 		MFATokenCode:    aws.String(""),
 	})
@@ -57,8 +57,7 @@ func (s3Backend *S3Backend) Download(destination string, options *Options) (map[
 			transformed = strings.Replace(transformed, substitution.Old, substitution.New, -1)
 		}
 
-		dir, _ := filepath.Split(transformed)
-
+		dir, transformed := filepath.Split(transformed)
 		err := os.MkdirAll(filepath.Join(destination, s3Backend.Bucket, dir), os.ModePerm)
 		if err != nil {
 			return nil, err
@@ -128,7 +127,6 @@ func (t *TerraformBackends) Load() (ResourceMap, error) {
 	for filename, s3 := range t.StateFilenames {
 		resources, err := LoadStateFromFile(filename)
 		if err != nil {
-			fmt.Println("Failed to load state", filename, err)
 			continue
 		}
 		for _, resource := range resources {
@@ -174,52 +172,45 @@ func LoadStateFromFile(filename string) ([]*resources.Resource, error) {
 	if err != nil {
 		return nil, err
 	}
-	state, err := terraform.ReadState(reader)
+	stateFile, err := statefile.Read(reader)
 	if err != nil {
 		return nil, err
 	}
 
-	filter := &terraform.StateFilter{State: state}
-	results, err := filter.Filter()
-	if err != nil {
-		return nil, err
-	}
-	for _, result := range results {
-		switch result.Value.(type) {
-		case *states.Resource:
-			// process
-		default:
-			continue
-		}
-
-		resource := result.Value.(*states.Resource)
-		for _, resourceInstance := range resource.Instances {
-
-			if resourceInstance.Current == nil {
-				continue
-			}
-
-			attr := resourceInstance.Current.AttrsFlat
-
-			additional := &resources.Resource{
-				ID: attr["id"],
-			}
-
-			if attr["arn"] == "" {
-				switch resource.Addr.Type {
-				case "aws_iam_access_key":
-				case "aws_route53_record":
-				case "aws_route53_zone":
-				default:
+	for _, module := range stateFile.State.Modules {
+		for _, resource := range module.Resources {
+			for _, instance := range resource.Instances {
+				if instance.Current == nil {
 					continue
 				}
-			} else {
-				additional.ARN = attr["arn"]
+
+				// TODO: properly decode with cty
+				decoded := map[string]interface{}{}
+				err := json.Unmarshal(instance.Current.AttrsJSON, &decoded)
+				if err != nil {
+					return output, err
+				}
+
+				additional := &resources.Resource{
+					ID: decoded["id"].(string),
+				}
+
+				if decoded["arn"] == nil {
+					switch resource.Addr.Type {
+					case "aws_iam_access_key":
+					case "aws_route53_record":
+					case "aws_route53_zone":
+					default:
+						continue
+					}
+				} else {
+					additional.ARN = decoded["arn"].(string)
+				}
+
+				output = append(output, additional)
+
 			}
-
-			output = append(output, additional)
 		}
-
 	}
 
 	return output, nil
