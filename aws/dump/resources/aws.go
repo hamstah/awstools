@@ -19,30 +19,29 @@ type Account struct {
 	Sessions    []*Session
 }
 
-type Accounts struct {
-	Accounts []*Account `json:"accounts"`
-	Sessions []*Session
-}
-
 type Session struct {
 	Session   *session.Session
 	Config    *aws.Config
 	AccountID string
 }
 
-func NewAccounts(filename string) (*Accounts, error) {
+func NewAccountsFromFile(filename string) ([]*Account, error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
 
-	result := &Accounts{}
-	err = json.Unmarshal(data, result)
+	accounts := []*Account{}
+	err = json.Unmarshal(data, &accounts)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, account := range result.Accounts {
+	return accounts, nil
+}
+
+func OpenSessions(accounts []*Account) error {
+	for _, account := range accounts {
 		account.Sessions = []*Session{}
 		for _, region := range account.Regions {
 			sess, conf := common.OpenSession(&common.SessionFlags{
@@ -59,7 +58,7 @@ func NewAccounts(filename string) (*Accounts, error) {
 			stsClient := sts.New(sess, conf)
 			identity, err := stsClient.GetCallerIdentity(&sts.GetCallerIdentityInput{})
 			if err != nil {
-				return nil, err
+				return err
 			}
 			session := &Session{
 				Session:   sess,
@@ -67,10 +66,7 @@ func NewAccounts(filename string) (*Accounts, error) {
 				AccountID: *identity.Account,
 			}
 			account.Sessions = append(account.Sessions, session)
-			result.Sessions = append(result.Sessions, session)
-
 		}
 	}
-
-	return result, nil
+	return nil
 }

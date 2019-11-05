@@ -53,8 +53,10 @@ func (s3Backend *S3Backend) Download(destination string, options *Options) (map[
 	for _, key := range s3Backend.Keys {
 
 		transformed := key
-		for _, substitution := range options.PathSubstitutions {
-			transformed = strings.Replace(transformed, substitution.Old, substitution.New, -1)
+		if options != nil && options.PathSubstitutions != nil {
+			for _, substitution := range options.PathSubstitutions {
+				transformed = strings.Replace(transformed, substitution.Old, substitution.New, -1)
+			}
 		}
 
 		dir, transformed := filepath.Split(transformed)
@@ -105,7 +107,31 @@ type TerraformBackends struct {
 	StateFilenames map[string]string
 }
 
+func (t *TerraformBackends) Verify() error {
+	if len(t.Destination) == 0 {
+		return errors.New("Destination field is empty")
+	}
+
+	if len(t.S3) == 0 {
+		return errors.New("s3 field is empty")
+	}
+
+	if t.Options == nil {
+		t.Options = &Options{
+			PathSubstitutions: []Substitution{},
+			Overwrite:         false,
+		}
+	}
+
+	return nil
+}
+
 func (t *TerraformBackends) Pull() error {
+
+	if err := t.Verify(); err != nil {
+		return nil
+	}
+
 	t.StateFilenames = map[string]string{}
 	for _, backend := range t.S3 {
 		filenames, err := backend.Download(t.Destination, t.Options)
@@ -137,7 +163,7 @@ func (t *TerraformBackends) Load() (ResourceMap, error) {
 	return managed, nil
 }
 
-func NewTerraformBackends(filename string) (*TerraformBackends, error) {
+func NewTerraformBackendsFromFile(filename string) (*TerraformBackends, error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
@@ -153,14 +179,6 @@ func NewTerraformBackends(filename string) (*TerraformBackends, error) {
 	err = json.Unmarshal(data, result)
 	if err != nil {
 		return nil, err
-	}
-
-	if len(result.Destination) == 0 {
-		return nil, errors.New("Destination field is empty")
-	}
-
-	if len(result.S3) == 0 {
-		return nil, errors.New("s3 field is empty")
 	}
 
 	return result, nil

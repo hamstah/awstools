@@ -3,6 +3,7 @@ module github.com/hamstah/awstools/aws/dump
 go 1.12
 
 require (
+	github.com/CrunchyData/crunchy-proxy v0.0.0-20190407215550-64e9426fd4ad // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20190717042225-c3de453c63f4 // indirect
 	github.com/aws/aws-lambda-go v1.13.2
