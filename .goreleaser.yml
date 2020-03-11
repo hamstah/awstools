@@ -247,3 +247,14 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
+  - env:
+      - CGO_ENABLED=0
+    main: ./s3/upload/
+    binary: s3-upload
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
