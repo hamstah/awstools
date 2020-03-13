@@ -1,6 +1,6 @@
 # s3-upload
 
-Download a single file from S3.
+Upload a single file to S3.
 
 ```
 usage: s3-upload --bucket=BUCKET --key=KEY --file=FILE [<flags>]
