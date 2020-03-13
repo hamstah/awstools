@@ -14,7 +14,7 @@ var (
 	bucket   = kingpin.Flag("bucket", "Name of the bucket").Required().String()
 	key      = kingpin.Flag("key", "Key of the uploaded file").Required().String()
 	file     = kingpin.Flag("file", "File to upload").Required().File()
-	acl      = kingpin.Flag("acl", "ACL of the uploaded file").String()
+	acl      = kingpin.Flag("acl", "ACL of the uploaded file").Default("private").String()
 	metadata = kingpin.Flag("metadata", "Metadata of the uploaded file (json)").String()
 )
 
