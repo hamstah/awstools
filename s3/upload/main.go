@@ -22,17 +22,16 @@ func main() {
 	kingpin.CommandLine.Name = "s3-upload"
 	kingpin.CommandLine.Help = "Upload a file to S3."
 	flags := common.HandleFlags()
+	defer (*file).Close()
 
 	session, conf := common.OpenSession(flags)
 
 	s3Client := s3.New(session, conf)
 	uploader := s3manager.NewUploaderWithClient(s3Client)
 
-	defer (*file).Close()
-
 	var parsedMetadata map[string]*string
 
-	if metadata != nil {
+	if metadata != nil && len(*metadata) != 0 {
 		err := json.Unmarshal([]byte(*metadata), &parsedMetadata)
 		common.FatalOnErrorW(err, "Invalid metadata")
 	}
@@ -47,10 +46,7 @@ func main() {
 
 	res, err := uploader.Upload(uploadInput)
 
-	if err != nil {
-		(*file).Close()
-		common.Fatalln(err.Error())
-	}
+	common.FatalOnError(err)
 
 	fmt.Println(res.Location)
 }
