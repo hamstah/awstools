@@ -3,6 +3,7 @@ package common
 import (
 	"errors"
 	"strings"
+	"fmt"
 )
 
 /*
@@ -23,6 +24,56 @@ type ARN struct {
 	ResourceType string
 	Resource     string
 	Qualifier    string
+}
+
+func (a *ARN) String() string {
+
+	resource := ""
+	for _, part := range []string{
+		a.ResourceType,
+		a.Resource,
+		a.Qualifier,
+	} {
+		if part == "" {
+			continue
+		}
+		if len(resource) > 0 {
+			resource += "/" + part
+		} else {
+			resource = part
+		}
+	}
+
+	return strings.Join([]string{
+		"arn",
+		a.Partition,
+		a.Service,
+		a.Region,
+		a.AccountID,
+		resource,
+	}, ":")
+}
+
+func ReplaceAccountID(arn, accountID string) (string, error) {
+	parsed, err := ParseARN(arn)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse ARN: %w", err)
+	}
+
+	parsed.AccountID = accountID
+	return parsed.String(), nil
+}
+
+func ReplaceAccountIDPtr(arn *string, accountID string) (*string, error) {
+	if arn == nil {
+		return nil, nil
+	}
+
+	res, err := ReplaceAccountID(*arn, accountID)
+	if err != nil {
+		return nil, err
+	}
+	return &res, nil
 }
 
 func ParseARN(arn string) (*ARN, error) {
