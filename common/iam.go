@@ -60,9 +60,9 @@ func NewConfig(region string) *aws.Config {
 	return &aws.Config{Region: aws.String(region)}
 }
 
-func NewSession(region string) *session.Session {
+func NewSession(region string) (*session.Session, error) {
 	awsConfig := NewConfig(region)
-	return session.New(awsConfig)
+	return session.NewSession(awsConfig)
 }
 
 type SessionTokenProvider struct {
@@ -121,8 +121,7 @@ func OpenSession(sessionFlags *SessionFlags) (*session.Session, *aws.Config) {
 func AssumeRoleConfig(sessionFlags *SessionFlags, sess *session.Session) *aws.Config {
 	conf := NewConfig(*sessionFlags.Region)
 	if sessionFlags.RoleArn != nil && *sessionFlags.RoleArn != "" {
-		var creds *credentials.Credentials
-		creds = stscreds.NewCredentials(sess, *sessionFlags.RoleArn, func(p *stscreds.AssumeRoleProvider) {
+		creds := stscreds.NewCredentials(sess, *sessionFlags.RoleArn, func(p *stscreds.AssumeRoleProvider) {
 			if *sessionFlags.RoleExternalID != "" {
 				p.ExternalID = sessionFlags.RoleExternalID
 			}

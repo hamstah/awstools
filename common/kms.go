@@ -69,7 +69,7 @@ func DecryptWithKMS(kmsClient *kms.KMS, ciphertext string) ([]byte, error) {
 	usingSecretBox := false
 	if len(content) > 14 {
 		if content[6] == 0x07 {
-			if bytes.Compare(content[7:14], []byte("payload")) == 0 {
+			if bytes.Equal(content[7:14], []byte("payload")) {
 				usingSecretBox = true
 			}
 		}

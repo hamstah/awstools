@@ -76,6 +76,7 @@ func TestSetFromMap(t *testing.T) {
 
 	res := Data{}
 	err = c.Refresh(nil, nil, &res)
+	require.NoError(t, err)
 
 	assert.Equal(t, "123", res.A)
 	assert.Equal(t, float64(456), res.B)
@@ -288,7 +289,6 @@ func TestSecretsManagerWithoutPrefix(t *testing.T) {
 	config, err := setFromMap(data)
 	require.NoError(t, err)
 
-	fmt.Println(config.Static)
 	assert.Equal(t, Source{Type: "SECRETS_MANAGER", Name: "a", Identifier: "hamstah/awstools/tests/test-1", Collapse: true}, config.Static["a"])
 	assert.Equal(t, Source{Type: "SECRETS_MANAGER", Name: "B", Identifier: "hamstah/awstools/tests/test-2", Collapse: true}, config.Static["B"])
 

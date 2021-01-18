@@ -40,11 +40,11 @@ func FlattenMap(input map[string]interface{}, transformKey func(string) string, 
 
 	for key, value := range input {
 		key = transformKey(key)
-		switch value.(type) {
+		switch v := value.(type) {
 		case int, string, float64, bool:
-			result[key] = value.(string)
+			result[key] = v.(string)
 		case map[string]interface{}:
-			sub, err := FlattenMap(value.(map[string]interface{}), transformKey, separator)
+			sub, err := FlattenMap(v, transformKey, separator)
 			if err != nil {
 				return nil, err
 			}

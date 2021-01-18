@@ -90,9 +90,9 @@ func (c *ConfigValues) GenerateFromMap(src map[string]interface{}) (map[string]i
 	dst := map[string]interface{}{}
 
 	for key, value := range src {
-		switch value.(type) {
+		switch v := value.(type) {
 		case map[string]interface{}:
-			val, err := c.GenerateFromMap(value.(map[string]interface{}))
+			val, err := c.GenerateFromMap(v)
 			if err != nil {
 				return nil, err
 			}
@@ -113,7 +113,7 @@ func (c *ConfigValues) GenerateFromMap(src map[string]interface{}) (map[string]i
 					dst[name] = Source{
 						Type:       secretType,
 						Name:       name,
-						Identifier: value.(string),
+						Identifier: v,
 						Collapse:   collapse,
 					}
 					found = true
@@ -124,8 +124,8 @@ func (c *ConfigValues) GenerateFromMap(src map[string]interface{}) (map[string]i
 			if !found {
 				collapse := strings.HasPrefix(key, "_")
 				for secretType, prefix := range c.ValuePrefixes {
-					if strings.HasPrefix(value.(string), prefix) {
-						value := value.(string)[len(prefix):]
+					if strings.HasPrefix(v, prefix) {
+						value := v[len(prefix):]
 
 						name := key
 						if collapse && (secretType == "SECRETS_MANAGER" || secretType == "SSM") {
@@ -218,32 +218,31 @@ func RefreshMap(src map[string]interface{}, state *RefreshState) (map[string]int
 	dst := map[string]interface{}{}
 
 	for key, value := range src {
-		switch value.(type) {
+		switch v := value.(type) {
 		case map[string]interface{}:
-			res, err := RefreshMap(value.(map[string]interface{}), state)
+			res, err := RefreshMap(v, state)
 			if err != nil {
 				return nil, errors.Wrap(err, fmt.Sprintf("failed to refresh sub map with key %s", key))
 			}
 			dst[key] = res
 		case Source:
-			source := value.(Source)
-			switch source.Type {
+			switch v.Type {
 			case "FILE":
-				bytes, err := ioutil.ReadFile(source.Identifier)
+				bytes, err := ioutil.ReadFile(v.Identifier)
 				if err != nil {
-					return nil, errors.Wrap(err, fmt.Sprintf("failed to load file %s for key %s", source.Identifier, key))
+					return nil, errors.Wrap(err, fmt.Sprintf("failed to load file %s for key %s", v.Identifier, key))
 				}
-				dst[source.Name] = string(bytes)
+				dst[v.Name] = string(bytes)
 			case "SSM":
 				if state.SSMClient == nil {
 					state.SSMClient = ssm.New(state.Session, state.Config)
 				}
-				if strings.HasSuffix(source.Identifier, "/*") {
-					values, err := getParametersByPath(state.SSMClient, source.Identifier[:len(source.Identifier)-2])
+				if strings.HasSuffix(v.Identifier, "/*") {
+					values, err := getParametersByPath(state.SSMClient, v.Identifier[:len(v.Identifier)-2])
 					if err != nil {
 						return nil, errors.Wrap(err, fmt.Sprintf("failed to fetch from SSM by path for key %s", key))
 					}
-					if source.Collapse {
+					if v.Collapse {
 						for subKey, subValue := range values {
 							dst[subKey] = subValue
 						}
@@ -251,21 +250,21 @@ func RefreshMap(src map[string]interface{}, state *RefreshState) (map[string]int
 						dst[key] = values
 					}
 				} else {
-					value, err := ssmGetParameter(state.SSMClient, source.Identifier)
+					value, err := ssmGetParameter(state.SSMClient, v.Identifier)
 					if err != nil {
 						return nil, errors.Wrap(err, fmt.Sprintf("failed to fetch from SSM for key %s", key))
 					}
-					dst[source.Name] = value
+					dst[v.Name] = value
 				}
 			case "SECRETS_MANAGER":
 				if state.SecretsManagerClient == nil {
 					state.SecretsManagerClient = secretsmanager.New(state.Session, state.Config)
 				}
-				values, err := secretsManagerGetSecretValue(state.SecretsManagerClient, source.Identifier, source.Name, state.Settings["secrets_manager_version_stage"])
+				values, err := secretsManagerGetSecretValue(state.SecretsManagerClient, v.Identifier, v.Name, state.Settings["secrets_manager_version_stage"])
 				if err != nil {
 					return nil, errors.Wrap(err, fmt.Sprintf("failed to fetch from Secrets Manager for key %s", key))
 				}
-				if source.Collapse {
+				if v.Collapse {
 					for subKey, subValue := range values {
 						dst[subKey] = subValue
 					}
@@ -276,11 +275,11 @@ func RefreshMap(src map[string]interface{}, state *RefreshState) (map[string]int
 				if state.KMSClient == nil {
 					state.KMSClient = kms.New(state.Session, state.Config)
 				}
-				value, err := DecryptWithKMS(state.KMSClient, source.Identifier)
+				value, err := DecryptWithKMS(state.KMSClient, v.Identifier)
 				if err != nil {
 					return nil, errors.Wrap(err, fmt.Sprintf("failed to decrypt KMS data for key %s", key))
 				}
-				dst[source.Name] = string(value)
+				dst[v.Name] = string(value)
 			}
 		default:
 			dst[key] = value
