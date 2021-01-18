@@ -9,18 +9,19 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
+	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/hamstah/awstools/common"
-
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
-	taskName = kingpin.Flag("task-name", "ECS task name").String()
-	cluster  = kingpin.Flag("cluster", "ECS cluster").Required().String()
-	services = kingpin.Flag("service", "ECS services").Required().Strings()
-	images   = kingpin.Flag("image", "Change the images to the new ones. Format is container_name=image. Can be repeated.").StringMap()
-	timeout  = kingpin.Flag("timeout", "Timeout when waiting for services to update").Default("300s").Duration()
-	taskJSON = kingpin.Flag("task-json", "Path to a JSON file with the task definition to use").String()
+	taskName            = kingpin.Flag("task-name", "ECS task name").String()
+	cluster             = kingpin.Flag("cluster", "ECS cluster").Required().String()
+	services            = kingpin.Flag("service", "ECS services").Required().Strings()
+	images              = kingpin.Flag("image", "Change the images to the new ones. Format is container_name=image. Can be repeated.").StringMap()
+	timeout             = kingpin.Flag("timeout", "Timeout when waiting for services to update").Default("300s").Duration()
+	taskJSON            = kingpin.Flag("task-json", "Path to a JSON file with the task definition to use").String()
+	overwriteAccountIDs = kingpin.Flag("overwrite-account-ids", "Overwrite account IDs in role ARN with the caller account ID").Default("false").Bool()
 )
 
 func main() {
@@ -39,7 +40,8 @@ func main() {
 	var err error
 	var taskDefinition *ecs.TaskDefinition
 
-	if *taskJSON != "" {
+	switch {
+	case *taskJSON != "":
 		b, err := ioutil.ReadFile(*taskJSON)
 		common.FatalOnError(err)
 
@@ -48,10 +50,10 @@ func main() {
 		common.FatalOnError(err)
 
 		taskName = taskDefinition.Family
-	} else if *taskName != "" {
+	case *taskName != "":
 		taskDefinition, err = getTaskDefinition(ecsClient, taskName)
 		common.FatalOnError(err)
-	} else {
+	default:
 		common.Fatalln("One of --task-json or --task-name is required")
 	}
 
@@ -64,7 +66,15 @@ func main() {
 		}
 	}
 
-	newTaskDefinition, err := updateTaskDefinition(ecsClient, taskDefinition)
+	accountID := ""
+	if *overwriteAccountIDs {
+		stsClient := sts.New(session, conf)
+		res, err := stsClient.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+		common.FatalOnError(err)
+		accountID = *res.Account
+	}
+
+	newTaskDefinition, err := updateTaskDefinition(ecsClient, taskDefinition, accountID)
 	common.FatalOnError(err)
 
 	fmt.Println(*newTaskDefinition.TaskDefinitionArn)
@@ -111,7 +121,7 @@ func main() {
 				common.Fatalln(fmt.Sprintf("%d still pending, giving up after %s", pending, *timeout))
 			}
 			if previousPending != pending {
-				fmt.Println(fmt.Sprintf("Waiting for %d service(s) to become ready", pending))
+				fmt.Printf("Waiting for %d service(s) to become ready\n", pending)
 			}
 			time.Sleep(1 * time.Second)
 		}
@@ -130,17 +140,33 @@ func getTaskDefinition(ecsClient *ecs.ECS, taskName *string) (*ecs.TaskDefinitio
 	return result.TaskDefinition, nil
 }
 
-func updateTaskDefinition(ecsClient *ecs.ECS, taskDefinition *ecs.TaskDefinition) (*ecs.TaskDefinition, error) {
+func updateTaskDefinition(ecsClient *ecs.ECS, taskDefinition *ecs.TaskDefinition, accountID string) (*ecs.TaskDefinition, error) {
+	var err error
+	taskRoleArn := taskDefinition.TaskRoleArn
+	executionRoleArn := taskDefinition.ExecutionRoleArn
+
+	if accountID != "" {
+		taskRoleArn, err = common.ReplaceAccountIDPtr(taskRoleArn, accountID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to replace accountID in task role arn")
+		}
+
+		executionRoleArn, err = common.ReplaceAccountIDPtr(executionRoleArn, accountID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to replace accountID in execution role arn")
+		}
+	}
+
 	updateInput := &ecs.RegisterTaskDefinitionInput{
 		ContainerDefinitions:    taskDefinition.ContainerDefinitions,
 		Cpu:                     taskDefinition.Cpu,
-		ExecutionRoleArn:        taskDefinition.ExecutionRoleArn,
+		ExecutionRoleArn:        executionRoleArn,
 		Family:                  taskDefinition.Family,
 		Memory:                  taskDefinition.Memory,
 		NetworkMode:             taskDefinition.NetworkMode,
 		PlacementConstraints:    taskDefinition.PlacementConstraints,
 		RequiresCompatibilities: taskDefinition.RequiresCompatibilities,
-		TaskRoleArn:             taskDefinition.TaskRoleArn,
+		TaskRoleArn:             taskRoleArn,
 		Volumes:                 taskDefinition.Volumes,
 	}
 
