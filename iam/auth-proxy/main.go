@@ -138,7 +138,11 @@ func main() {
 				tokenStsClient := stsClient
 				if *flags.RoleArn != "" || *flags.MFASerialNumber != "" {
 					// get the session token without the session
-					tokenStsClient = sts.New(common.NewSession(*flags.Region))
+					sess, err := common.NewSession(*flags.Region)
+					if err != nil {
+						return forbidden(r.Request, fmt.Sprintf("Failed to open IAM session"))
+					}
+					tokenStsClient = sts.New(sess)
 				}
 
 				creds, err := tokenStsClient.GetSessionToken(&sts.GetSessionTokenInput{
