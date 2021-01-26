@@ -104,7 +104,9 @@ func main() {
 	sshPublicKeyBytes, err := ioutil.ReadFile(*sshPublicKeyFilename)
 	common.FatalOnErrorW(err, "could not read the SSH public key")
 
-	userSession := common.NewSession("")
+	userSession, err := common.NewSession("")
+	common.FatalOnErrorW(err, "could not open user IAM session")
+
 	stsClient := sts.New(userSession)
 
 	url, err := common.STSGetIdentityURL(stsClient)
