@@ -1,8 +1,6 @@
-before:
-  hooks:
-    - go mod download
-archive:
-  format: binary
+archives:
+  - id: main
+    format: binary
 checksum:
   name_template: 'SHA256SUMS'
 changelog:
@@ -11,23 +9,26 @@ changelog:
     exclude:
     - '^docs:'
     - '^test:'
-sign:
-  signature: "${artifact}.asc"
-  artifacts: all
-  args: ["--armor", "--output", "$signature", "--detach-sig", "$artifact"]
-nfpm:
-  vendor: hamstah
-  homepage: https://github.com/hamstah/awstools
-  maintainer: Nico Esteves <contact@hamstah.com>
-  license: MIT
-  formats:
-    - deb
-    - rpm
+signs:
+  -
+    signature: "${artifact}.asc"
+    artifacts: all
+    args: ["--armor", "--output", "$signature", "--detach-sig", "$artifact"]
+nfpms:
+  -
+    vendor: hamstah
+    homepage: https://github.com/hamstah/awstools
+    maintainer: Nico Esteves <contact@hamstah.com>
+    license: MIT
+    formats:
+      - deb
+      - rpm
 release:
   draft: true
 builds:
 
-  - env:
+  - id: aws-dump
+    env:
       - CGO_ENABLED=0
     main: ./aws/dump/
     binary: aws-dump
@@ -38,7 +39,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: elb-resolve-alb-external-url
+    env:
       - CGO_ENABLED=0
     main: ./elb/resolve-alb-external-url/
     binary: elb-resolve-alb-external-url
@@ -49,7 +51,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: elb-resolve-elb-external-url
+    env:
       - CGO_ENABLED=0
     main: ./elb/resolve-elb-external-url/
     binary: elb-resolve-elb-external-url
@@ -60,7 +63,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: ec2-ip-from-name
+    env:
       - CGO_ENABLED=0
     main: ./ec2/ip-from-name/
     binary: ec2-ip-from-name
@@ -71,7 +75,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: ec2-describe-instances
+    env:
       - CGO_ENABLED=0
     main: ./ec2/describe-instances/
     binary: ec2-describe-instances
@@ -82,7 +87,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: kms-env
+    env:
       - CGO_ENABLED=0
     main: ./kms/env/
     binary: kms-env
@@ -93,7 +99,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: cloudwatch-put-metric-data
+    env:
       - CGO_ENABLED=0
     main: ./cloudwatch/put-metric-data/
     binary: cloudwatch-put-metric-data
@@ -104,7 +111,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: iam-request-ssh-key-signature
+    env:
       - CGO_ENABLED=0
     main: ./iam/request-ssh-key-signature/
     binary: iam-request-ssh-key-signature
@@ -115,7 +123,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: iam-sync-users
+    env:
       - CGO_ENABLED=0
     main: ./iam/sync-users/
     binary: iam-sync-users
@@ -126,7 +135,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: iam-auth-proxy
+    env:
       - CGO_ENABLED=0
     main: ./iam/auth-proxy/
     binary: iam-auth-proxy
@@ -137,7 +147,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: iam-session
+    env:
       - CGO_ENABLED=0
     main: ./iam/session/
     binary: iam-session
@@ -148,7 +159,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: iam-public-ssh-keys
+    env:
       - CGO_ENABLED=0
     main: ./iam/public-ssh-keys/
     binary: iam-public-ssh-keys
@@ -159,7 +171,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: ecs-dashboard
+    env:
       - CGO_ENABLED=0
     main: ./ecs/dashboard/
     binary: ecs-dashboard
@@ -170,7 +183,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: ecs-deploy
+    env:
       - CGO_ENABLED=0
     main: ./ecs/deploy/
     binary: ecs-deploy
@@ -181,7 +195,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: ecs-locate
+    env:
       - CGO_ENABLED=0
     main: ./ecs/locate/
     binary: ecs-locate
@@ -192,7 +207,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: ecs-run-task
+    env:
       - CGO_ENABLED=0
     main: ./ecs/run-task/
     binary: ecs-run-task
@@ -203,7 +219,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: lambda-ping
+    env:
       - CGO_ENABLED=0
     main: ./lambda/ping/
     binary: lambda-ping
@@ -214,7 +231,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: lambda-sign-ssh-key
+    env:
       - CGO_ENABLED=0
     main: ./lambda/sign-ssh-key/
     binary: lambda-sign-ssh-key
@@ -225,7 +243,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: ecr-get-login
+    env:
       - CGO_ENABLED=0
     main: ./ecr/get-login/
     binary: ecr-get-login
@@ -236,7 +255,8 @@ builds:
       - amd64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - env:
+  - id: s3-download
+    env:
       - CGO_ENABLED=0
     main: ./s3/download/
     binary: s3-download
