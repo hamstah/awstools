@@ -81,6 +81,7 @@ func main() {
 	flags := common.HandleFlags()
 
 	config := common.NewConfigValues()
+	config.MaxRetries = *refreshMaxRetries
 	config.KeyPrefixes = map[string]string{
 		"KMS":             *kmsPrefix,
 		"SSM":             *ssmPrefix,
@@ -88,6 +89,7 @@ func main() {
 		"FILE":            "FILE_",
 	}
 	config.Settings["secrets_manager_version_stage"] = *secretsManagerVersionStage
+
 	err := config.SetFromEnvironment()
 	common.FatalOnError(err)
 
@@ -107,8 +109,8 @@ func main() {
 
 		if p != nil {
 			waitingPid = p.Process.Pid
-			p.Process.Signal(syscall.SIGTERM)
-			p.Wait()
+			_ = p.Process.Signal(syscall.SIGTERM)
+			_ = p.Wait()
 
 			if *refreshAction == "EXIT" {
 				os.Exit(0)

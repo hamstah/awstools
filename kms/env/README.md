@@ -45,7 +45,9 @@ Args:
 * SSM values should be the path to the parameter store parameter. If the path ends in `/*` it will fetch the values
   under that path (non-recursively) and prefix them with the original env var. If the name is prefix with an extra `_`.
   no prefix is used
-* Secret manager values should be the name of the secret. It supports JSON encoded values in either SecretString or SecretBinary and will fetch the AWSCURRENT version by default (override with `--secrets-manager-version-stage`). JSON keys are upper cased and prefixed with the name of the environment variable excluding the prefix. To not include the prefix, use an extra `_` before the variable name, for example `SSM__A=` or `_A=ssm://...`.
+* Secret manager values should be the name of the secret. It supports JSON encoded values in either SecretString or SecretBinary and will fetch the AWSCURRENT version by default (override with `--secrets-manager-version-stage`). JSON keys are upper cased and prefixed with the name of the environment variable excluding the prefix. To not include the prefix, use an extra `_` before the
+variable name, for example `SSM__A=` or `_A=ssm://...`.
+* Refresh configuration and restart or exit the child process
 
 ## Examples
 
@@ -173,3 +175,11 @@ kms-env program
 ```
 
 Will have the content of /path/to/file in the ABC environment variable.
+
+### Refresh the configuration and restart the process if it changed
+
+```
+export SECRETS_MANAGER_ABC=name/of/secret
+
+kms-env --refresh-interval 10m --refresh-action RESTART program
+```
