@@ -1,5 +1,21 @@
 # Changelog
 
+## v9.0.0 (2021-01-26)
+
+**Breaking**
+
+* `aws-dump`: Config file format changed
+
+**New**
+
+* all: Use go modules and upgrade dependencies, including the AWS go SDK to support the metadata service v2
+* `aws-dump`: Added new resources
+* `ecs-deploy`: Added `--overwrite-account-ids`
+
+**Fix**
+
+* `kms-env`: Fixed `--refresh-max-retries` not being set properly
+* `ecs-dashboard`: Fixed some npm dependencies vulnerabilities
 
 ## v8.1.0 (2019-08-17)
 
