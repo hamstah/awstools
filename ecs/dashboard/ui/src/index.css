@@ -16,19 +16,23 @@ body {
   border: none;
 }
 
-.table td.strong-left, .table th.strong-left {
+.table td.strong-left,
+.table th.strong-left {
   border-left: 2px solid #ccc;
 }
 
-.table td.strong-right, .table th.strong-right {
+.table td.strong-right,
+.table th.strong-right {
   border-right: 2px solid #ccc;
 }
 
-.table td.strong-top, .table th.strong-top {
+.table td.strong-top,
+.table th.strong-top {
   border-top: 2px solid #ccc;
 }
 
-.table tr:last-child td.strong-bottom, .table tr:last-child th.strong-bottom{
+.table tr:last-child td.strong-bottom,
+.table tr:last-child th.strong-bottom {
   border-bottom: 2px solid #ccc;
 }
 
