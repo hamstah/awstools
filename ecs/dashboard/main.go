@@ -1,7 +1,9 @@
 package main
 
 import (
+	"embed"
 	"fmt"
+	"io/fs"
 	"net/http"
 	"os"
 	"os/exec"
@@ -10,11 +12,13 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/gobuffalo/packr"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
+
+//go:embed ui/dist
+var embeddedFS embed.FS
 
 var (
 	region = "eu-west-1"
@@ -47,6 +51,11 @@ func main() {
 		region = "eu-west-1"
 	}
 
+	uiFiles, err := fs.Sub(embeddedFS, "ui/dist")
+	if err != nil {
+		panic(err)
+	}
+
 	updateConfig(*configFilename)
 	go watchConfig(*configFilename)
 
@@ -73,7 +82,7 @@ func main() {
 		})
 	})
 
-	r.PathPrefix("/").Handler(http.FileServer(packr.NewBox("./ui/dist")))
+	r.PathPrefix("/").Handler(http.FileServer(http.FS(uiFiles)))
 
 	cors := handlers.AllowedOrigins([]string{"*"})
 
@@ -84,7 +93,7 @@ func main() {
 		}()
 	}
 
-	err := http.ListenAndServe(fmt.Sprintf(":%d", *port), handlers.CORS(cors)(r))
+	err = http.ListenAndServe(fmt.Sprintf(":%d", *port), handlers.CORS(cors)(r))
 	if err != nil {
 		fmt.Println(err)
 	}
