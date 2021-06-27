@@ -10,6 +10,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	serviceNameChunkSize = 10
+)
+
 func fetchAccount(account Account) (*AccountState, error) {
 	logger := log.WithFields(log.Fields{
 		"account": account.AccountName,
@@ -50,16 +54,24 @@ func fetchAccount(account Account) (*AccountState, error) {
 			continue
 		}
 
-		if len(serviceNames) == 0 {
+		serviceCount := len(serviceNames)
+		if serviceCount == 0 {
 			continue
 		}
 
-		newServices, err := describeServices(svc, cluster.ClusterName, serviceNames)
-		if err != nil {
-			logger.Error(err)
-			continue
+		for i := 0; i < serviceCount; i += serviceNameChunkSize {
+			maxIndex := i + serviceNameChunkSize
+			if maxIndex > serviceCount {
+				maxIndex = serviceCount
+			}
+
+			newServices, err := describeServices(svc, cluster.ClusterName, serviceNames[i:maxIndex])
+			if err != nil {
+				logger.Error(err)
+				continue
+			}
+			services = append(services, newServices...)
 		}
-		services = append(services, newServices...)
 	}
 
 	for _, service := range services {
