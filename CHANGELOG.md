@@ -1,5 +1,12 @@
 # Changelog
 
+## v9.0.1 (2021-06-29)
+
+**Fix**
+
+* `ecs-dashboard`: Fix dashboard not loading correctly with more than 10 ECS services
+* `ecs-dashboard`: Updated some npm dependencies vulnerabilities
+
 ## v9.0.0 (2021-01-26)
 
 **Breaking**
