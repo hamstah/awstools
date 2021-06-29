@@ -24,6 +24,7 @@ func fetchAccount(account Account) (*AccountState, error) {
 		RoleExternalID: &account.ExternalID,
 		Region:         &account.Region,
 
+		RolePolicy:      aws.String(""),
 		RoleSessionName: aws.String(""),
 		MFASerialNumber: aws.String(""),
 		MFATokenCode:    aws.String(""),
