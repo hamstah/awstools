@@ -16,6 +16,7 @@ Flags:
       --image=IMAGE ...        Change the images to the new ones. Format is container_name=image. Can be repeated.
       --timeout=300s           Timeout when waiting for services to update
       --task-json=TASK-JSON    Path to a JSON file with the task definition to use
+      --task-variables=k=v     Variables to be replaced in the task definition 
       --overwrite-account-ids  Overwrite account IDs in role ARN with the caller account ID
       --assume-role-arn=ASSUME-ROLE-ARN
                                Role to assume

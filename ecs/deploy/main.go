@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -21,6 +22,7 @@ var (
 	images              = kingpin.Flag("image", "Change the images to the new ones. Format is container_name=image. Can be repeated.").StringMap()
 	timeout             = kingpin.Flag("timeout", "Timeout when waiting for services to update").Default("300s").Duration()
 	taskJSON            = kingpin.Flag("task-json", "Path to a JSON file with the task definition to use").String()
+	taskVariables       = kingpin.Flag("task-variables", "Variables to be replaced in the task definition").StringMap()
 	overwriteAccountIDs = kingpin.Flag("overwrite-account-ids", "Overwrite account IDs in role ARN with the caller account ID").Default("false").Bool()
 )
 
@@ -44,6 +46,12 @@ func main() {
 	case *taskJSON != "":
 		b, err := ioutil.ReadFile(*taskJSON)
 		common.FatalOnError(err)
+
+		if taskVariables != nil {
+			for k, v := range *taskVariables {
+				b = bytes.ReplaceAll(b, []byte(fmt.Sprintf("${%s}", k)), []byte(v))
+			}
+		}
 
 		taskDefinition = &ecs.TaskDefinition{}
 		err = json.Unmarshal(b, taskDefinition)
