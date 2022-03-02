@@ -1,6 +1,6 @@
 module github.com/hamstah/awstools/elb/resolve-alb-external-url
 
-go 1.15
+go 1.17
 
 require (
 	github.com/aws/aws-sdk-go v1.36.31

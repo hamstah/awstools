@@ -1,6 +1,6 @@
 module github.com/hamstah/awstools/iam/public-ssh-keys
 
-go 1.15
+go 1.17
 
 require (
 	github.com/aws/aws-sdk-go v1.36.31
