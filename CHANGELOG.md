@@ -1,5 +1,11 @@
 # Changelog
 
+## v9.1.0 (2022-03-02)
+
+**New**
+
+* `ecs-deploy`: Add task definition variable substitution
+
 ## v9.0.1 (2021-06-29)
 
 **Fix**
