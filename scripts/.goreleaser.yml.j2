@@ -30,13 +30,14 @@ builds:
   - id: {{build.name}}
     env:
       - CGO_ENABLED=0
-    main: {{build.src}}
+    dir: {{build.src}}
     binary: {{build.name}}
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{ '{{' }}.Version{{ '}}' }} -X github.com/hamstah/awstools/common.CommitHash={{ '{{' }}.ShortCommit{{ '}}' }}"
   {%- endfor %}

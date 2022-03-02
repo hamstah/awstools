@@ -30,240 +30,260 @@ builds:
   - id: aws-dump
     env:
       - CGO_ENABLED=0
-    main: ./aws/dump/
+    dir: ./aws/dump/
     binary: aws-dump
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: elb-resolve-alb-external-url
     env:
       - CGO_ENABLED=0
-    main: ./elb/resolve-alb-external-url/
+    dir: ./elb/resolve-alb-external-url/
     binary: elb-resolve-alb-external-url
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: elb-resolve-elb-external-url
     env:
       - CGO_ENABLED=0
-    main: ./elb/resolve-elb-external-url/
+    dir: ./elb/resolve-elb-external-url/
     binary: elb-resolve-elb-external-url
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: ec2-ip-from-name
     env:
       - CGO_ENABLED=0
-    main: ./ec2/ip-from-name/
+    dir: ./ec2/ip-from-name/
     binary: ec2-ip-from-name
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: ec2-describe-instances
     env:
       - CGO_ENABLED=0
-    main: ./ec2/describe-instances/
+    dir: ./ec2/describe-instances/
     binary: ec2-describe-instances
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: kms-env
     env:
       - CGO_ENABLED=0
-    main: ./kms/env/
+    dir: ./kms/env/
     binary: kms-env
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: cloudwatch-put-metric-data
     env:
       - CGO_ENABLED=0
-    main: ./cloudwatch/put-metric-data/
+    dir: ./cloudwatch/put-metric-data/
     binary: cloudwatch-put-metric-data
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: iam-request-ssh-key-signature
     env:
       - CGO_ENABLED=0
-    main: ./iam/request-ssh-key-signature/
+    dir: ./iam/request-ssh-key-signature/
     binary: iam-request-ssh-key-signature
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: iam-sync-users
     env:
       - CGO_ENABLED=0
-    main: ./iam/sync-users/
+    dir: ./iam/sync-users/
     binary: iam-sync-users
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: iam-auth-proxy
     env:
       - CGO_ENABLED=0
-    main: ./iam/auth-proxy/
+    dir: ./iam/auth-proxy/
     binary: iam-auth-proxy
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: iam-session
     env:
       - CGO_ENABLED=0
-    main: ./iam/session/
+    dir: ./iam/session/
     binary: iam-session
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: iam-public-ssh-keys
     env:
       - CGO_ENABLED=0
-    main: ./iam/public-ssh-keys/
+    dir: ./iam/public-ssh-keys/
     binary: iam-public-ssh-keys
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: ecs-dashboard
     env:
       - CGO_ENABLED=0
-    main: ./ecs/dashboard/
+    dir: ./ecs/dashboard/
     binary: ecs-dashboard
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: ecs-deploy
     env:
       - CGO_ENABLED=0
-    main: ./ecs/deploy/
+    dir: ./ecs/deploy/
     binary: ecs-deploy
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: ecs-locate
     env:
       - CGO_ENABLED=0
-    main: ./ecs/locate/
+    dir: ./ecs/locate/
     binary: ecs-locate
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: ecs-run-task
     env:
       - CGO_ENABLED=0
-    main: ./ecs/run-task/
+    dir: ./ecs/run-task/
     binary: ecs-run-task
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: lambda-ping
     env:
       - CGO_ENABLED=0
-    main: ./lambda/ping/
+    dir: ./lambda/ping/
     binary: lambda-ping
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: lambda-sign-ssh-key
     env:
       - CGO_ENABLED=0
-    main: ./lambda/sign-ssh-key/
+    dir: ./lambda/sign-ssh-key/
     binary: lambda-sign-ssh-key
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: ecr-get-login
     env:
       - CGO_ENABLED=0
-    main: ./ecr/get-login/
+    dir: ./ecr/get-login/
     binary: ecr-get-login
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: s3-download
     env:
       - CGO_ENABLED=0
-    main: ./s3/download/
+    dir: ./s3/download/
     binary: s3-download
     goos:
       - linux
       - darwin
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
