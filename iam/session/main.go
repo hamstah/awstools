@@ -6,11 +6,11 @@ import (
 	"os/exec"
 	"strings"
 
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/hamstah/awstools/common"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 	ini "gopkg.in/ini.v1"
 )
 
