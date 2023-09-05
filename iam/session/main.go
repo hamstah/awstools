@@ -18,6 +18,7 @@ var (
 	quiet            = kingpin.Flag("quiet", "Do not output anything").Short('q').Default("false").Bool()
 	saveProfileName  = kingpin.Flag("save-profile", "Save the profile in the AWS credentials storage").Short('s').String()
 	overwriteProfile = kingpin.Flag("overwrite-profile", "Overwrite the profile if it already exists").Default("false").Bool()
+	printIdentityURL = kingpin.Flag("print-identity-url", "Print the identity URL").Default("false").Bool()
 	command          = kingpin.Arg("command", "Command to run, prefix with -- to pass args").Strings()
 )
 
@@ -30,13 +31,19 @@ func main() {
 		common.Fatalln("--save-profile can only be used with --assume-role-arn or --mfa-serial-number")
 	}
 
-	if len(*command) == 0 && len(*saveProfileName) == 0 {
-		common.Fatalln("Use at least one of command or --save-profile")
+	if len(*command) == 0 && len(*saveProfileName) == 0 && !*printIdentityURL {
+		common.Fatalln("Use at least one of command, --print-identity-url or --save-profile")
 	}
 
 	session, conf := common.OpenSession(flags)
-
 	stsClient := sts.New(session, conf)
+
+	if *printIdentityURL {
+		identityURL, err := common.STSGetIdentityURL(stsClient)
+		common.FatalOnError(err)
+		fmt.Println(identityURL)
+	}
+
 	res, err := stsClient.GetCallerIdentity(&sts.GetCallerIdentityInput{})
 	common.FatalOnError(err)
 

@@ -6,26 +6,29 @@ usage: iam-session [<flags>] [<command>...]
 Start a new session under a different role.
 
 Flags:
-      --help                 Show context-sensitive help (also try --help-long and --help-man).
-  -q, --quiet                Do not output anything
+      --[no-]help                Show context-sensitive help (also try --help-long and --help-man).
+  -q, --[no-]quiet               Do not output anything
   -s, --save-profile=SAVE-PROFILE
-                             Save the profile in the AWS credentials storage
-      --overwrite-profile    Overwrite the profile if it already exists
+                                 Save the profile in the AWS credentials storage
+      --[no-]overwrite-profile   Overwrite the profile if it already exists
+      --[no-]print-identity-url  Print the identity URL
       --assume-role-arn=ASSUME-ROLE-ARN
-                             Role to assume
+                                 Role to assume
       --assume-role-external-id=ASSUME-ROLE-EXTERNAL-ID
-                             External ID of the role to assume
+                                 External ID of the role to assume
       --assume-role-session-name=ASSUME-ROLE-SESSION-NAME
-                             Role session name
-      --region=REGION        AWS Region
+                                 Role session name
+      --assume-role-policy=ASSUME-ROLE-POLICY
+                                 IAM policy to use when assuming the role
+      --region=REGION            AWS Region
       --mfa-serial-number=MFA-SERIAL-NUMBER
-                             MFA Serial Number
+                                 MFA Serial Number
       --mfa-token-code=MFA-TOKEN-CODE
-                             MFA Token Code
-      --session-duration=1h  Session Duration
-  -v, --version              Display the version
-      --log-level=warn       Log level
-      --log-format=text      Log format
+                                 MFA Token Code
+      --session-duration=1h      Session Duration
+  -v, --[no-]version             Display the version
+      --log-level=warn           Log level
+      --log-format=text          Log format
 
 Args:
   [<command>]  Command to run, prefix with -- to pass args
@@ -82,3 +85,11 @@ aws --profile=new-profile ec2 describe-instances
 The new profile will be added to `~/.aws/credentials` and `~/.aws/config`
 
 If the profile already exists you will be prompted to confirm its replacement. You can avoid the prompt by using `--overwrite-profile`
+
+### Print a STS URL to prove your identity
+
+```
+iam-session --print-identity-url
+```
+
+The URL printed is a signed `GetCallerIdentity` request that can be fetched by anyone to get verify the IAM ARN of the caller of the command.
