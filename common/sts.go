@@ -8,7 +8,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/private/protocol/xml/xmlutil"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"github.com/hamstah/paranoidhttp"
+	"github.com/hakobe/paranoidhttp"
 )
 
 func STSGetIdentityURL(stsClient *sts.STS) (string, error) {
@@ -30,11 +30,11 @@ func STSFetchIdentityURL(identityURL string, maxAge time.Duration) (*sts.GetCall
 	}
 
 	if url.Host != "sts.amazonaws.com" || query.Get("Action") != "GetCallerIdentity" || url.Scheme != "https" {
-		return nil, errors.New("URL is not a valid sts:GetCallerIdentity call.")
+		return nil, errors.New("url is not a valid sts:GetCallerIdentity call")
 	}
 
 	if time.Now().UTC().Sub(date) > maxAge {
-		return nil, errors.New("URL signature is too old.")
+		return nil, errors.New("url signature is too old")
 	}
 
 	res, err := paranoidhttp.DefaultClient.Get(identityURL)

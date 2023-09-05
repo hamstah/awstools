@@ -1,6 +1,6 @@
 package common
 
-import kingpin "gopkg.in/alecthomas/kingpin.v2"
+import kingpin "github.com/alecthomas/kingpin/v2"
 
 func HandleFlags() *SessionFlags {
 	sessionFlags := KingpinSessionFlags()

@@ -100,7 +100,7 @@ func DecryptWithKMS(kmsClient *kms.KMS, ciphertext string) ([]byte, error) {
 		var plaintext []byte
 		plaintext, ok := secretbox.Open(plaintext, p.Message, p.Nonce, key)
 		if !ok {
-			return nil, fmt.Errorf("Failed to open secretbox")
+			return nil, fmt.Errorf("failed to open secretbox")
 		}
 		return plaintext, nil
 	}

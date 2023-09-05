@@ -1,8 +1,8 @@
 package common
 
 import (
+	kingpin "github.com/alecthomas/kingpin/v2"
 	log "github.com/sirupsen/logrus"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 type LogFlags struct {

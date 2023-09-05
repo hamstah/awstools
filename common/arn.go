@@ -2,8 +2,8 @@ package common
 
 import (
 	"errors"
-	"strings"
 	"fmt"
+	"strings"
 )
 
 /*
@@ -79,7 +79,7 @@ func ReplaceAccountIDPtr(arn *string, accountID string) (*string, error) {
 func ParseARN(arn string) (*ARN, error) {
 	parts := strings.Split(arn, ":")
 	if len(parts) < 6 {
-		return nil, errors.New("Invalid format")
+		return nil, errors.New("invalid format")
 	}
 
 	result := &ARN{

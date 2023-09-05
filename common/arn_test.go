@@ -24,5 +24,5 @@ func TestReplaceAccountID(t *testing.T) {
 	expectedArn := "arn:aws:iam::000000999999:role/aws-service-role/autoscaling.amazonaws.com/AWSServiceRoleForAutoScaling"
 	replaced, err := ReplaceAccountID(arn, accountID)
 	require.NoError(t, err)
-	assert.Equal(t,expectedArn, replaced)
+	assert.Equal(t, expectedArn, replaced)
 }
