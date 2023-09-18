@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/hamstah/awstools/common"
 	log "github.com/sirupsen/logrus"
-
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
