@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/aws/aws-sdk-go/service/ecr"
 	"github.com/hamstah/awstools/common"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
@@ -37,6 +37,6 @@ func main() {
 			common.Fatalln("Invalid token format")
 		}
 
-		fmt.Println(fmt.Sprintf("docker login -u %s -p %s %s", parts[0], parts[1], *credentials.ProxyEndpoint))
+		fmt.Printf("docker login -u %s -p %s %s\n", parts[0], parts[1], *credentials.ProxyEndpoint)
 	}
 }
