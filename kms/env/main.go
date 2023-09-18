@@ -8,12 +8,12 @@ import (
 	"syscall"
 	"time"
 
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/hamstah/awstools/common"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
@@ -60,7 +60,7 @@ func Monitor(flags *common.SessionFlags, config *common.ConfigValues, comm chan<
 		return
 	}
 
-	for _ = range time.Tick(*refreshInterval) {
+	for range time.Tick(*refreshInterval) {
 		new, err := RefreshAndFlatten(config, session, awsConfig)
 		if err != nil {
 			log.Error(err)
