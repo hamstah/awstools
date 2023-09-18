@@ -1,5 +1,11 @@
 # Changelog
 
+## v9.2.0 (2023-09-05)
+
+**New**
+
+* `iam-session`: Add `--print-identity-url`
+
 ## v9.1.0 (2022-03-02)
 
 **New**
