@@ -3,10 +3,10 @@ package main
 import (
 	"os"
 
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/hamstah/awstools/common"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
