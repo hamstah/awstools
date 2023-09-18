@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/aws/aws-sdk-go/service/elb"
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/hamstah/awstools/common"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
@@ -69,5 +69,5 @@ func main() {
 			}
 		}
 	}
-	fmt.Println(fmt.Sprintf("%s://%s:%d", strings.ToLower(protocol), dnsName, port))
+	fmt.Printf("%s://%s:%d\n", strings.ToLower(protocol), dnsName, port)
 }
