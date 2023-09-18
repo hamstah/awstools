@@ -8,7 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/hamstah/awstools/common"
 
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
+	kingpin "github.com/alecthomas/kingpin/v2"
 )
 
 var (
@@ -111,7 +111,6 @@ func main() {
 		if !ok {
 			common.Fatalln("Could not get an IP address for EC2")
 		}
-		fmt.Println(fmt.Sprintf("%s:%d", ip, port))
+		fmt.Printf("%s:%d\n", ip, port)
 	}
-
 }
