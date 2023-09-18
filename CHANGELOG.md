@@ -1,5 +1,11 @@
 # Changelog
 
+## v9.3.0 (2023-09-18)
+
+**New**
+
+* `ecs-deploy`: Add `--update-task-definition-only`
+
 ## v9.2.0 (2023-09-05)
 
 **New**
