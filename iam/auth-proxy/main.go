@@ -11,13 +11,13 @@ import (
 	"net/url"
 	"regexp"
 
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/elazarl/goproxy"
 	"github.com/hamstah/awstools/common"
 	"golang.org/x/net/proxy"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
