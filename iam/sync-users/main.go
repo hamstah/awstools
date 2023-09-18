@@ -12,11 +12,11 @@ import (
 	"strconv"
 	"strings"
 
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/iam"
 	"github.com/hamstah/awstools/common"
 	log "github.com/sirupsen/logrus"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 type IAMUser struct {
@@ -134,7 +134,7 @@ func FindMinimalUID() (int, error) {
 		return -1, err
 	}
 
-	return -1, errors.New("Could not find UID_MIN")
+	return -1, errors.New("could not find UID_MIN")
 }
 
 func LocalUsers() ([]*user.User, error) {
@@ -239,27 +239,27 @@ func createUser(iamUser *IAMUser) error {
 
 func ensureCanCreateUser() error {
 	if _, err := os.Stat("/usr/sbin/adduser"); os.IsNotExist(err) {
-		return errors.New("Can't find adduser to create user")
+		return errors.New("can't find adduser to create user")
 	}
 
 	if _, err := os.Stat("/usr/sbin/usermod"); os.IsNotExist(err) {
-		return errors.New("Can't find usermod to manage user groups")
+		return errors.New("can't find usermod to manage user groups")
 	}
 
 	if _, err := os.Stat("/usr/sbin/usermod"); os.IsNotExist(err) {
-		return errors.New("Can't find usermod to manage user groups")
+		return errors.New("can't find usermod to manage user groups")
 	}
 
 	if _, err := os.Stat("/etc/login.defs"); os.IsNotExist(err) {
-		return errors.New("Can't find /etc/login.defs to find minimal uid")
+		return errors.New("can't find /etc/login.defs to find minimal uid")
 	}
 
 	if _, err := os.Stat("/etc/passwd"); os.IsNotExist(err) {
-		return errors.New("Can't find /etc/passwd to find local users")
+		return errors.New("can't find /etc/passwd to find local users")
 	}
 
 	if _, err := os.Stat("/etc/sudoers.d"); os.IsNotExist(err) {
-		return errors.New("Can't find sudoers directory to create user")
+		return errors.New("can't find sudoers directory to create user")
 	}
 	return nil
 }
@@ -334,7 +334,7 @@ func getUsersForGroup(client *iam.IAM, groupName string, iamTagsPrefix string) (
 	for i := 0; i < len(users); i++ {
 		result := <-results
 		if result == nil {
-			return nil, errors.New("Failed to list tags for user")
+			return nil, errors.New("failed to list tags for user")
 		}
 		output = append(output, result)
 	}
