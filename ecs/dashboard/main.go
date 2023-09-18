@@ -10,11 +10,11 @@ import (
 	"sync"
 	"time"
 
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 //go:embed ui/dist
