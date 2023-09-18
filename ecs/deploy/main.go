@@ -15,14 +15,15 @@ import (
 )
 
 var (
-	taskName            = kingpin.Flag("task-name", "ECS task name").String()
-	cluster             = kingpin.Flag("cluster", "ECS cluster").Required().String()
-	services            = kingpin.Flag("service", "ECS services").Required().Strings()
-	images              = kingpin.Flag("image", "Change the images to the new ones. Format is container_name=image. Can be repeated.").StringMap()
-	timeout             = kingpin.Flag("timeout", "Timeout when waiting for services to update").Default("300s").Duration()
-	taskJSON            = kingpin.Flag("task-json", "Path to a JSON file with the task definition to use").String()
-	taskVariables       = kingpin.Flag("task-variables", "Variables to be replaced in the task definition").StringMap()
-	overwriteAccountIDs = kingpin.Flag("overwrite-account-ids", "Overwrite account IDs in role ARN with the caller account ID").Default("false").Bool()
+	taskName                 = kingpin.Flag("task-name", "ECS task name").String()
+	cluster                  = kingpin.Flag("cluster", "ECS cluster").Required().String()
+	services                 = kingpin.Flag("service", "ECS services").Strings()
+	images                   = kingpin.Flag("image", "Change the images to the new ones. Format is container_name=image. Can be repeated.").StringMap()
+	timeout                  = kingpin.Flag("timeout", "Timeout when waiting for services to update").Default("300s").Duration()
+	taskJSON                 = kingpin.Flag("task-json", "Path to a JSON file with the task definition to use").String()
+	taskVariables            = kingpin.Flag("task-variables", "Variables to be replaced in the task definition").StringMap()
+	overwriteAccountIDs      = kingpin.Flag("overwrite-account-ids", "Overwrite account IDs in role ARN with the caller account ID").Default("false").Bool()
+	updateTaskDefinitionOnly = kingpin.Flag("update-task-definition-only", "Only update the task definition").Default("false").Bool()
 )
 
 func main() {
@@ -85,6 +86,9 @@ func main() {
 	common.FatalOnError(err)
 
 	fmt.Println(*newTaskDefinition.TaskDefinitionArn)
+	if *updateTaskDefinitionOnly {
+		return
+	}
 
 	pending := 0
 	for _, service := range *services {
