@@ -1,0 +1,24 @@
+go 1.21.0
+
+use (
+	./aws/dump
+	./cloudwatch/put-metric-data
+	./ec2/describe-instances
+	./ec2/ip-from-name
+	./ecr/get-login
+	./ecs/dashboard
+	./ecs/deploy
+	./ecs/locate
+	./ecs/run-task
+	./elb/resolve-alb-external-url
+	./elb/resolve-elb-external-url
+	./iam/auth-proxy
+	./iam/public-ssh-keys
+	./iam/request-ssh-key-signature
+	./iam/session
+	./iam/sync-users
+	./kms/env
+	./lambda/ping
+	./lambda/sign-ssh-key
+	./s3/download
+)
