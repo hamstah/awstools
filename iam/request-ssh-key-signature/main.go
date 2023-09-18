@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/aws/aws-sdk-go/service/lambda"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/hamstah/awstools/common"
@@ -16,7 +17,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
@@ -101,7 +101,7 @@ func main() {
 	flags := common.HandleFlags()
 	HandleOptionalArgs()
 
-	sshPublicKeyBytes, err := ioutil.ReadFile(*sshPublicKeyFilename)
+	sshPublicKeyBytes, err := os.ReadFile(*sshPublicKeyFilename)
 	common.FatalOnErrorW(err, "could not read the SSH public key")
 
 	userSession, err := common.NewSession("")
