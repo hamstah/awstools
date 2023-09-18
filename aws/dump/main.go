@@ -13,7 +13,7 @@ import (
 	"github.com/hamstah/awstools/common"
 	log "github.com/sirupsen/logrus"
 
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
+	kingpin "github.com/alecthomas/kingpin/v2"
 )
 
 var (
