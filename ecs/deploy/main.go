@@ -4,15 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"time"
 
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ecs"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"github.com/hamstah/awstools/common"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
@@ -44,7 +43,7 @@ func main() {
 
 	switch {
 	case *taskJSON != "":
-		b, err := ioutil.ReadFile(*taskJSON)
+		b, err := os.ReadFile(*taskJSON)
 		common.FatalOnError(err)
 
 		if taskVariables != nil {
