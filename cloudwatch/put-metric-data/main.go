@@ -1,10 +1,10 @@
 package main
 
 import (
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/cloudwatch"
 	"github.com/hamstah/awstools/common"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
