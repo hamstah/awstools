@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
+	kingpin "github.com/alecthomas/kingpin/v2"
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/hamstah/awstools/common"
-	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
 var (
