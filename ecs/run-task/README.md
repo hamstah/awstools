@@ -12,6 +12,8 @@ Flags:
       --task-definition=TASK-DEFINITION
                              ECS task definition
       --cluster=CLUSTER      ECS cluster
+      --task-overrides-json=TASK-OVERRIDES-JSON
+                             Path to a JSON file with the task overrides to use
       --assume-role-arn=ASSUME-ROLE-ARN
                              Role to assume
       --assume-role-external-id=ASSUME-ROLE-EXTERNAL-ID
