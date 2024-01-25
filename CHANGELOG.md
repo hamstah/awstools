@@ -1,5 +1,11 @@
 # Changelog
 
+## v9.4.0 (2024-01-25)
+
+**New**
+
+* `ecs-run-task`: Add `--task-overrides-json`
+
 ## v9.3.0 (2023-09-18)
 
 **New**
