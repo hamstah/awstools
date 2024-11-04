@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/signal"
 	"reflect"
 	"syscall"
 	"time"
@@ -97,8 +98,10 @@ func main() {
 	go Monitor(flags, config, comm)
 
 	var p *exec.Cmd
-
 	waitingPid := -1
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	for envMap := range comm {
 		if envMap == nil {
@@ -128,6 +131,15 @@ func main() {
 		p.Stdout = os.Stdout
 		err := p.Start()
 		common.FatalOnError(err)
+
+		// forward signals to the child process
+		go func(p *exec.Cmd) {
+			for sig := range sigChan {
+				if p.Process != nil {
+					p.Process.Signal(sig)
+				}
+			}
+		}(p)
 
 		go func(p *exec.Cmd) {
 			p.Wait()
