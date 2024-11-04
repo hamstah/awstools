@@ -1,5 +1,11 @@
 # Changelog
 
+## v9.5.0 (2024-11-04)
+
+**Fix**
+
+* `kms-env`: Forward SIGKILL/SIGTERM to child process
+
 ## v9.4.0 (2024-01-25)
 
 **New**
