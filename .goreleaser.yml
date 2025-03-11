@@ -1,3 +1,4 @@
+version: 2
 archives:
   - id: main
     format: binary
@@ -23,10 +24,11 @@ nfpms:
     formats:
       - deb
       - rpm
-release:
-  draft: true
-builds:
 
+release:
+  draft: false
+
+builds:
   - id: aws-dump
     env:
       - CGO_ENABLED=0
