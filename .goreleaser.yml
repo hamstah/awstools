@@ -183,19 +183,6 @@ builds:
       - arm64
     ldflags:
       - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
-  - id: ecs-dashboard
-    env:
-      - CGO_ENABLED=0
-    dir: ./ecs/dashboard/
-    binary: ecs-dashboard
-    goos:
-      - linux
-      - darwin
-    goarch:
-      - amd64
-      - arm64
-    ldflags:
-      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: ecs-deploy
     env:
       - CGO_ENABLED=0
