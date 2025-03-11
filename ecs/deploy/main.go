@@ -24,6 +24,7 @@ var (
 	taskVariables            = kingpin.Flag("task-variables", "Variables to be replaced in the task definition").StringMap()
 	overwriteAccountIDs      = kingpin.Flag("overwrite-account-ids", "Overwrite account IDs in role ARN with the caller account ID").Default("false").Bool()
 	updateTaskDefinitionOnly = kingpin.Flag("update-task-definition-only", "Only update the task definition").Default("false").Bool()
+	forceNewDeployment       = kingpin.Flag("force-new-deployment", "Force a new deployment of the service").Default("false").Bool()
 )
 
 func main() {
@@ -37,6 +38,17 @@ func main() {
 
 	if *taskJSON != "" && *taskName != "" {
 		common.Fatalln("Use only one of --task-json and --task-name")
+	}
+
+	if *forceNewDeployment {
+		if *updateTaskDefinitionOnly || len(*images) != 0 || *taskJSON != "" || len(*taskVariables) != 0 {
+			common.Fatalln("Use --force-new-deployment without other flags")
+		}
+
+		if err := runForceNewDeployment(ecsClient, cluster, services); err != nil {
+			common.Fatalln(err.Error())
+		}
+		return
 	}
 
 	var err error
@@ -90,7 +102,6 @@ func main() {
 		return
 	}
 
-	pending := 0
 	for _, service := range *services {
 		_, err := ecsClient.UpdateService(&ecs.UpdateServiceInput{
 			Cluster:        cluster,
@@ -99,11 +110,28 @@ func main() {
 		})
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "Failed to update service", service, err)
-		} else {
-			pending++
+		}
+	}
+	monitorServices(ecsClient, cluster, services, len(*services))
+}
+
+func runForceNewDeployment(ecsClient *ecs.ECS, cluster *string, services *[]string) error {
+	for _, service := range *services {
+		_, err := ecsClient.UpdateService(&ecs.UpdateServiceInput{
+			Cluster:            cluster,
+			Service:            aws.String(service),
+			ForceNewDeployment: aws.Bool(true),
+		})
+		if err != nil {
+			return err
 		}
 	}
 
+	monitorServices(ecsClient, cluster, services, len(*services))
+	return nil
+}
+
+func monitorServices(ecsClient *ecs.ECS, cluster *string, services *[]string, pending int) {
 	serviceNamesInput := []*string{}
 	for _, service := range *services {
 		serviceNamesInput = append(serviceNamesInput, aws.String(service))
