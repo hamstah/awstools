@@ -1,5 +1,15 @@
 # Changelog
 
+## v9.6.0 (2025-03-11)
+
+**New**
+
+* `ecs-deploy`: Add `--force-new-deployment`
+
+**Note**
+
+* `ecs-dashboard` won't be included in future releases for now as it's not being actively developed and some dependencies are not being maintained. It is still functional and can be installed manually from older releases.
+
 ## v9.5.0 (2024-11-04)
 
 **Fix**
