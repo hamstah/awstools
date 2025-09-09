@@ -1,8 +1,9 @@
-go 1.21.0
+go 1.25.1
 
 use (
 	./aws/dump
 	./cloudwatch/put-metric-data
+	./common
 	./ec2/describe-instances
 	./ec2/ip-from-name
 	./ecr/get-login

@@ -1,10 +1,10 @@
 module github.com/hamstah/awstools/lambda/ping
 
-go 1.17
+go 1.25.1
 
 require (
-	github.com/aws/aws-lambda-go v1.41.0
-	github.com/aws/aws-sdk-go v1.45.11
+	github.com/aws/aws-lambda-go v1.49.0
+	github.com/aws/aws-sdk-go v1.55.8
 )
 
 require (

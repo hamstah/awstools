@@ -1,24 +1,25 @@
 module github.com/hamstah/awstools/iam/auth-proxy
 
-go 1.21
-
-toolchain go1.21.0
+go 1.25.1
 
 require (
-	github.com/alecthomas/kingpin/v2 v2.3.2
-	github.com/aws/aws-sdk-go v1.45.11
-	github.com/elazarl/goproxy v0.0.0-20230808193330-2592e75ae04a
-	github.com/hamstah/awstools/common v0.0.0-20230905015132-d23905c12bb5
-	golang.org/x/net v0.15.0
+	github.com/alecthomas/kingpin/v2 v2.4.0
+	github.com/aws/aws-sdk-go v1.55.8
+	github.com/elazarl/goproxy v1.7.2
+	github.com/hamstah/awstools/common v0.0.0-20250311132610-4c1ba75c7dd5
+	golang.org/x/net v0.43.0
 )
 
 require (
-	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
+	github.com/alecthomas/units v0.0.0-20240927000941-0f3dac36c52b // indirect
 	github.com/hakobe/paranoidhttp v0.3.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
-	golang.org/x/crypto v0.13.0 // indirect
-	golang.org/x/sys v0.12.0 // indirect
+	golang.org/x/crypto v0.42.0 // indirect
+	golang.org/x/sys v0.36.0 // indirect
+	golang.org/x/text v0.29.0 // indirect
 )
+
+replace github.com/hamstah/awstools/common => ../../common
