@@ -1,5 +1,9 @@
 # Changelog
 
+## v10.0.0 (2025-09-22)
+
+* `aws-dump`: Deprecated as it hasn't been maintained and terraform changed their internal package format, breaking the tool with newer versions of the SDK.
+
 ## v9.6.0 (2025-03-11)
 
 **New**
