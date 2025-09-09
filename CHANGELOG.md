@@ -1,5 +1,9 @@
 # Changelog
 
+## v9.7.0 (2025-09-22)
+
+No functional changes
+
 ## v9.6.0 (2025-03-11)
 
 **New**
