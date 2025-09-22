@@ -29,19 +29,6 @@ release:
   draft: false
 
 builds:
-  - id: aws-dump
-    env:
-      - CGO_ENABLED=0
-    dir: ./aws/dump/
-    binary: aws-dump
-    goos:
-      - linux
-      - darwin
-    goarch:
-      - amd64
-      - arm64
-    ldflags:
-      - -s -w -X github.com/hamstah/awstools/common.Version={{.Version}} -X github.com/hamstah/awstools/common.CommitHash={{.ShortCommit}}"
   - id: elb-resolve-alb-external-url
     env:
       - CGO_ENABLED=0

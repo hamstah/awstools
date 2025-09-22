@@ -6,7 +6,6 @@ Collection of tools to make working with AWS a bit easier without having to depe
 
 | Tool                                                           | Overview                                                                                                        |
 |----------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-| [aws-dump](aws/dump)                                           | Dumps (a subset of) AWS resources metadata to JSON and optionally check if they are in terraform state.         |
 | [iam-session](iam/session/)                                    | Creates new IAM session with role assumption and MFA support.                                                   |
 | [iam-public-keys](iam/public-ssh-keys)                         | Returns the public SSH keys of an IAM user.                                                                     |
 | [iam-sync-users](iam/sync-users)                               | Create Linux users from IAM                                                                                     |
@@ -57,9 +56,9 @@ Download the signature from the release and use GPG to verify it
 version=7.4.0
 os=linux
 arch=amd64
-wget https://github.com/hamstah/awstools/releases/download/v${version}/aws-dump_${version}_${os}_${arch} -O aws-dump
-wget https://github.com/hamstah/awstools/releases/download/v${version}/aws-dump_${version}_${os}_${arch}.asc -O aws-dump.asc
-gpg --verify aws-dump.asc aws-dump
+wget https://github.com/hamstah/awstools/releases/download/v${version}/iam-session_${version}_${os}_${arch} -O iam-session
+wget https://github.com/hamstah/awstools/releases/download/v${version}/iam-session_${version}_${os}_${arch}.asc -O iam-session.asc
+gpg --verify iam-session.asc iam-session
 ```
 
 The signing key is

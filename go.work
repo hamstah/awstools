@@ -1,7 +1,6 @@
 go 1.25.1
 
 use (
-	./aws/dump
 	./cloudwatch/put-metric-data
 	./common
 	./ec2/describe-instances
